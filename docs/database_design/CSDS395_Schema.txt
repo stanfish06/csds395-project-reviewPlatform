@@ -1,0 +1,144 @@
+CREATE SCHEMA IF NOT EXISTS reviewWeb; 
+USE reviewWeb;
+
+# Entities ------------------------------------------------------------------------
+
+## to store the users' information
+CREATE TABLE IF NOT EXISTS User (
+    caseID         VARCHAR(7),
+    userName       VARCHAR(100),
+    profileImage   BLOB, 
+    isFirstLogin   CHAR(1),
+    createTime     SMALLDATETIME, 
+    totalQuestions INT DEFAULT 0,
+    PRIMARY KEY (caseID),
+    CHECK (isFirstLogin IN ('T', 'F'))
+);
+
+## to store the restaurants' information 
+CREATE TABLE IF NOT EXISTS Store (
+    storeID        INT, 
+    storeName      VARCHAR(100),
+    website        VARCHAR(300), 
+    phoneNumber    INT,
+    PRIMARY KEY (storeID)
+);
+
+## to store the view history of users; merged with relationship "belongs" and "of_1"
+CREATE TABLE IF NOT EXISTS History (
+    historyID      INT,    
+    viewTime       SMALLDATETIME,
+    userCaseID     VARCHAR(7) NOT NULL,
+    storeID        INT NOT NULL,
+    PRIMARY KEY (historyID),
+    FOREIGN KEY (userCaseID) 
+      REFERENCES User(caseID),
+    FOREIGN KEY (storeID) 
+      REFERENCES Store(storeID)
+);
+
+## to store the tags (i.e."characteristics") of restaurants & users' tastes
+CREATE TABLE IF NOT EXISTS Tag (
+    tagID          INT,    
+    tagName        VARCHAR(20) NOT NULL,
+    PRIMARY KEY (tagID)
+);
+
+## to store the questions asked by users; merged with "ask" and "relate_1" since they are many to one
+CREATE TABLE IF NOT EXISTS Question (
+    questionID     INT, 
+    askTime        SMALLDATETIME NOT NULL,
+    questionDetail VARCHAR(300) NOT NULL,
+    storeID        INT NOT NULL,
+    userCaseID     VARCHAR(7) NOT NULL,
+    PRIMARY KEY (questionID), 
+    FOREIGN KEY (userCaseID) 
+      REFERENCES User(caseID),
+    FOREIGN KEY (storeID) 
+      REFERENCES Store(storeID)
+);
+
+## to store the answers to the questions; merged with "for" and "write_1"
+CREATE TABLE IF NOT EXISTS Answer (
+    answerID       INT, 
+    answerTime     SMALLDATETIME NOT NULL,
+    answerDetail   VARCHAR(1000) NOT NULL,
+    questionID     INT NOT NULL, 
+    userCaseID     VARCHAR(7) NOT NULL,
+    PRIMARY KEY (answerID), 
+    FOREIGN KEY (questionID) 
+      REFERENCES Question(questionID),
+    FOREIGN KEY (userCaseID) 
+      REFERENCES User(caseID)
+);
+
+## to store the notification of questions; merged with "of_2" and "to"
+CREATE TABLE IF NOT EXISTS Notification (
+    notificationID INT, 
+    notDetail      VARCHAR(1000) NOT NULL,
+    answerID       INT NOT NULL,  
+    userCaseID     VARCHAR(7) NOT NULL,
+    PRIMARY KEY (notificationID), 
+    FOREIGN KEY (answerID) 
+      REFERENCES Answer(answerID),
+    FOREIGN KEY (userCaseID) 
+      REFERENCES User(caseID)
+);
+
+## to store the answers to the questions; merged with "relate_2" and "write_2"
+CREATE TABLE IF NOT EXISTS Review (
+    reviewID       INT, 
+    reviewTime     SMALLDATETIME NOT NULL,
+    reviewDetail   VARCHAR(1000),
+    score          INT NOT NULL, 
+    storeID        INT NOT NULL,
+    userCaseID     VARCHAR(7) NOT NULL,
+    PRIMARY KEY (reviewID), 
+    FOREIGN KEY (storeID) 
+      REFERENCES Store(storeID),
+    FOREIGN KEY (userCaseID) 
+      REFERENCES User(caseID), 
+    CHECK (score < 6)
+);
+
+
+# Relationships -------------------------------------------------------------------
+
+## to store the relationship between User & Tag: "like_1"
+CREATE TABLE IF NOT EXISTS like1 (
+    userCaseID     VARCHAR(7) NOT NULL,    
+    tagID          INT NOT NULL,
+    PRIMARY KEY (userCaseID, tagID),
+    FOREIGN KEY (userCaseID) 
+      REFERENCES User(caseID),
+    FOREIGN KEY (tagID) 
+      REFERENCES Tag(tagID),
+);
+
+## to store the relationshop between Store & Tag: "serve"
+CREATE TABLE IF NOT EXISTS serve (
+    tagID          INT NOT NULL,
+    storeID        INT NOT NULL,
+    PRIMARY KEY (tagID, storeID),
+    FOREIGN KEY (tagID) 
+      REFERENCES Tag(tagID),
+    FOREIGN KEY (storeID) 
+      REFERENCES Store(storeID)
+);
+
+## to store "favourite restaurant information" by each user: "like_2"
+CREATE TABLE IF NOT EXISTS like2 (
+    userCaseID     VARCHAR(7) NOT NULL,
+    storeID        INT NOT NULL,
+    PRIMARY KEY (userCaseID, storeID),
+    FOREIGN KEY (userCaseID) 
+      REFERENCES User(caseID),
+    FOREIGN KEY (storeID) 
+      REFERENCES Store(storeID)
+);
+
+
+
+
+
+
