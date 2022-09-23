@@ -1,0 +1,101 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  caseId         String         @id
+  userName       String
+  profileImage   String?
+  isFirstLogin   Boolean        @default(true)
+  createTime     DateTime       @default(now())
+  totalQuestions Int?           @default(0)
+  favStore       Store[]
+  tags           Tag[]
+  questions      Question[]
+  answers        Answer[]
+  reviews        Review[]
+  viewHistory    History[]
+  notifications  Notification[]
+}
+
+model Store {
+  storeId    Int        @id @default(autoincrement())
+  storeName  String
+  website    String
+  phoneNum   String
+  totalScore Int        @default(0)
+  features   Tag[]
+  users      User[]
+  history    History[]
+  questions  Question[]
+  reviews    Review[]
+}
+
+model History {
+  historyId  Int      @id @default(autoincrement())
+  viewedTime DateTime @default(now())
+  storeId    Int
+  userId     String
+  belongsTo  User     @relation(fields: [userId], references: [caseId], onDelete: Cascade)
+  relatesTo  Store    @relation(fields: [storeId], references: [storeId], onDelete: Cascade)
+}
+
+model Tag {
+  tagId   Int     @id @default(autoincrement())
+  tagName String
+  users   User[]
+  stores  Store[]
+}
+
+model Question {
+  questionId    Int      @id @default(autoincrement())
+  question      String
+  askedAt       DateTime @default(now())
+  storeId       Int
+  storeName     String
+  userId        String
+  publisherName String
+  askedBy       User     @relation(fields: [userId], references: [caseId])
+  askStore      Store    @relation(fields: [storeId], references: [storeId], onDelete: Cascade)
+  answers       Answer[]
+}
+
+model Answer {
+  answerId      Int            @id @default(autoincrement())
+  answer        String
+  answeredAt    DateTime       @default(now())
+  userId        String
+  publisherName String
+  questionId    Int
+  question      Question       @relation(fields: [questionId], references: [questionId], onDelete: Cascade)
+  answeredBy    User           @relation(fields: [userId], references: [caseId])
+  Notification  Notification[]
+}
+
+model Notification {
+  notifyId  Int      @id @default(autoincrement())
+  notDetail String
+  noteAt    DateTime @default(now())
+  userId    String
+  answerId  Int
+  belongsTo User     @relation(fields: [userId], references: [caseId])
+  answer    Answer   @relation(fields: [answerId], references: [answerId])
+}
+
+model Review {
+  reviewId   Int      @id @default(autoincrement())
+  reviewAt   DateTime @default(now())
+  userId     String
+  score      Int      @default(0)
+  storeId    Int
+  reviewedBy User     @relation(fields: [userId], references: [caseId])
+  relateTo   Store    @relation(fields: [storeId], references: [storeId], onDelete: Cascade)
+}
