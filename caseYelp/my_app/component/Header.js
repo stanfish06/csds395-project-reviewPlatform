@@ -56,10 +56,12 @@ import { Search2Icon, HamburgerIcon, BellIcon, StarIcon } from '@chakra-ui/icons
 import {
     FiTag,
 } from 'react-icons/fi';
+import { useRouter } from 'next/router'
 
 export default function Header() {
     const { isOpen, onOpen, onClose } = useDisclosure()
     const btnRef = React.useRef()
+    const router = useRouter()
     return (
         <>
             <Flex as='nav' align='center' justify='space-between' wrap='wrap' padding='1rem' bg='#0a304e' color='white' marginBotton='2rem' boxShadow='2xl'>
@@ -68,7 +70,7 @@ export default function Header() {
                         CaseYelp
                     </Heading>
                 </Flex>
-                <Select variant='outline' bg='white' w='1000px' placeholder='Search options' color='black' icon={<Search2Icon />}>
+                <Select variant='outline' bg='white' w='1000px' placeholder='Search options' color='black' hidden={router.pathname==='/home' ? '' : 'hidden'} icon={<Search2Icon hidden={router.pathname==='/home' ? '' : 'hidden'}/>} >
                     <option value='option1'>Personal favorites</option>
                     <option value='option2'>Picked for you</option>
                     <option value='option3'>Viewed before</option>
@@ -93,7 +95,7 @@ export default function Header() {
                             </Box>
                         </MenuButton>
                         <MenuList color='black'>
-                            <MenuItem>
+                            <MenuItem onClick={() => router.push('/profile')}>
                                 My account
                             </MenuItem>
                             <MenuItem onClick={onOpen}>
