@@ -32,7 +32,7 @@ export default function SocialProfileWithImage() {
                             h={'120px'}
                             w={'full'}
                             src=
-                            {'https://media-exp1.licdn.com/dms/image/C4D1BAQF1hCnQqVYncQ/company-background_10000/0/1602522327089?e=1665032400&v=beta&t=ERLgTDu6_stGUpqSU4QMXCX8AqjElq_TfRSRYSlGBw8'}
+                            {'https://images.adsttc.com/media/images/5721/c139/e58e/ce5c/ad00/001a/large_jpg/CASE_ex_js_3256.jpg?1461829933'}
                             objectFit={'cover'}
                         />
                         <Flex justify={'center'} mt={-12}>
