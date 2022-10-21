@@ -17,7 +17,8 @@ import {
 import { BsStar, BsStarFill, BsStarHalf } from 'react-icons/bs';
 import { TiHeartOutline, TiHeart } from 'react-icons/Ti';
 import { FiShoppingCart } from 'react-icons/fi';
-import React, { useState } from 'react'
+import React, { useState } from 'react';
+import { useRouter } from 'next/router';
 
 const data = {
   isNew: true,
@@ -58,6 +59,7 @@ function Rating({ rating, numReviews }) {
 }
 
 function ProductAddToCart(_store) {
+  const router = useRouter()
   const [store, setStore] = useState(_store._store)
   const {
     storeId,
@@ -129,35 +131,36 @@ function ProductAddToCart(_store) {
             color={'gray.800'}
             fontSize={'1.2em'}>
             <chakra.a href={'#'} display={'flex'}>
-                <Button
-                  px={4}
-                  fontSize={'sm'}
-                  rounded={'full'}
-                  bg={'blue.400'}
-                  color={'white'}
-                  boxShadow={
-                    '0px 1px 25px -5px rgb(66 153 225 / 48%), 0 10px 10px -5px rgb(66 153 225 / 43%)'
-                  }
-                  _hover={{
-                    bg: 'blue.500',
-                  }}
-                  _focus={{
-                    bg: 'blue.500',
-                  }}>
-                  Check it out!
-                </Button>
-            </chakra.a>
-          </Tooltip>
-        </Flex>
+              <Button
+                px={4}
+                fontSize={'sm'}
+                rounded={'full'}
+                bg={'blue.400'}
+                color={'white'}
+                boxShadow={
+                  '0px 1px 25px -5px rgb(66 153 225 / 48%), 0 10px 10px -5px rgb(66 153 225 / 43%)'
+                }
+                _hover={{
+                  bg: 'blue.500',
+                }}
+                _focus={{
+                  bg: 'blue.500',
+                }}
+                onClick={() => router.push(`/store?id=${storeId}`)}>
+              Check it out!
+            </Button>
+          </chakra.a>
+        </Tooltip>
+      </Flex>
 
-        <Flex justifyContent="space-between" alignContent="center" mt={5}>
-          <Rating rating={rate} numReviews={_count.reviews} />
-          <Box fontSize="2xl" color={useColorModeValue('gray.800', 'white')} as='button' >
-            <Icon as={flag ? TiHeart : TiHeartOutline} h={7} w={7} alignSelf={'center'} />
-          </Box>
-        </Flex>
-      </Box>
+      <Flex justifyContent="space-between" alignContent="center" mt={5}>
+        <Rating rating={rate} numReviews={_count.reviews} />
+        <Box fontSize="2xl" color={useColorModeValue('gray.800', 'white')} as='button' >
+          <Icon as={flag ? TiHeart : TiHeartOutline} h={7} w={7} alignSelf={'center'} />
+        </Box>
+      </Flex>
     </Box>
+    </Box >
   );
 }
 
