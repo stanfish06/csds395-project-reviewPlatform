@@ -1,3 +1,4 @@
+import React, { useState } from 'react'
 import Head from "next/head";
 import Header from "../component/Header";
 import Sidebar from "../component/Sidebar";

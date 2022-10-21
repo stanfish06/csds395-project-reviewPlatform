@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from 'react'
 import {
     Grid,
     GridItem,
@@ -50,18 +50,62 @@ import {
     NextLink,
     Link,
     Stack,
-    Text
+    Text,
+    useCheckboxGroup
 } from '@chakra-ui/react'
-import { Search2Icon, HamburgerIcon, BellIcon, StarIcon } from '@chakra-ui/icons'
+import { Search2Icon, HamburgerIcon, BellIcon, StarIcon, SmallAddIcon } from '@chakra-ui/icons'
 import {
     FiTag,
 } from 'react-icons/fi';
 import { useRouter } from 'next/router'
 
-export default function Header() {
+const Header = () => {
     const { isOpen, onOpen, onClose } = useDisclosure()
     const btnRef = React.useRef()
     const router = useRouter()
+    const [tags, setTags] = useState([])
+    //const [alltags, setAlltags] = useState(_alltags)
+
+    const fetchTags = async () => {
+        console.log('stan')
+        const response = await fetch('/api/tag')
+        const data = await response.json()
+        const alltags = data[1]
+        const userTags = data[0][0].tags
+
+        const map = new Map();
+        console.log(data[0][0].tags)
+        for (let i = 0; i < userTags.length; i++) {
+            map.set(userTags[i].tagId, i)
+        }
+        for (let i = 0; i < alltags.length; i++) {
+            if (map.has(alltags[i].tagId)) {
+                alltags[i].selected = true
+            }
+            else {
+                alltags[i].selected = false
+            }
+        }
+        console.log(alltags)
+
+        setTags(alltags)
+        onOpen();
+    }
+
+    const submitTags = async () => {
+        const response = await fetch('/api/tag', {
+            method: 'POST',
+            body: tags,
+        })
+    }
+
+    const changeSelectStatus = async (tagid) => {
+        for (let i = 0; i < tags; i++) {
+            if (tags[i].tagId == tagid) {
+                tags[i].selected = !tags[i].selected
+            }
+        }
+    }
     return (
         <>
             <Flex as='nav' align='center' justify='space-between' wrap='wrap' padding='1rem' bg='#0a304e' color='white' marginBotton='2rem' boxShadow='2xl'>
@@ -70,7 +114,7 @@ export default function Header() {
                         CaseYelp
                     </Heading>
                 </Flex>
-                <Select variant='outline' bg='white' w='1000px' placeholder='Search options' color='black' hidden={router.pathname==='/home' ? '' : 'hidden'} icon={<Search2Icon hidden={router.pathname==='/home' ? '' : 'hidden'}/>} >
+                <Select variant='outline' bg='white' w='1000px' placeholder='Search options' color='black' hidden={router.pathname === '/home' ? '' : 'hidden'} icon={<Search2Icon hidden={router.pathname === '/home' ? '' : 'hidden'} />} >
                     <option value='option1'>Personal favorites</option>
                     <option value='option2'>Picked for you</option>
                     <option value='option3'>Viewed before</option>
@@ -81,7 +125,7 @@ export default function Header() {
                     <option value='option7'>Japanese</option>
                 </Select>
                 <ButtonGroup gap='1'>
-                    <IconButton color='black' icon={<FiTag />} onClick={onOpen}></IconButton>
+                    <IconButton color='black' icon={<FiTag />} onClick={fetchTags}></IconButton>
                     <IconButton color='black' icon={<BellIcon />}></IconButton>
                     <Menu>
                         <MenuButton
@@ -98,7 +142,7 @@ export default function Header() {
                             <MenuItem onClick={() => router.push('/profile')}>
                                 My account
                             </MenuItem>
-                            <MenuItem onClick={onOpen}>
+                            <MenuItem>
                                 My tags
                             </MenuItem>
                         </MenuList>
@@ -110,6 +154,7 @@ export default function Header() {
                         placement='right'
                         onClose={onClose}
                         finalFocusRef={btnRef}
+                        onOpen={fetchTags}
                     >
                         <DrawerOverlay />
                         <DrawerContent>
@@ -118,20 +163,45 @@ export default function Header() {
 
                             <DrawerBody>
 
-                                <Input mb={5} placeholder='Editing your tags' />
-
                                 <Box>
-                                    {['Spicy', 'Sweet', 'Vegan'].map((type) => (
+                                    {tags.map((tag) => (tag.selected ?
                                         <Tag
                                             size='sm'
-                                            key={type}
+                                            key={tag.tagId}
                                             borderRadius='full'
                                             variant='solid'
                                             colorScheme='green'
                                             mr={1}
                                         >
-                                            <TagLabel>{type}</TagLabel>
-                                            <TagCloseButton />
+                                            <TagLabel>{tag.tagName}</TagLabel>
+                                            <TagCloseButton onClick={() => {
+                                                setTags(
+                                                    tags.map((item) =>
+                                                        item.tagId === tag.tagId
+                                                            ? { ...item, selected: false }
+                                                            : { ...item }
+                                                    )
+                                                );
+                                            }} />
+                                        </Tag> :
+                                        <Tag
+                                            size='sm'
+                                            key={tag.tagId}
+                                            borderRadius='full'
+                                            variant='solid'
+                                            colorScheme='red'
+                                            mr={1}
+                                        >
+                                            <TagLabel>{tag.tagName}</TagLabel>
+                                            <IconButton color='black' icon={<SmallAddIcon />} size='24px' ml={2} onClick={() => {
+                                                setTags(
+                                                    tags.map((item) =>
+                                                        item.tagId === tag.tagId
+                                                            ? { ...item, selected: true }
+                                                            : { ...item }
+                                                    )
+                                                );
+                                            }} />
                                         </Tag>
                                     ))}
                                 </Box>
@@ -151,3 +221,5 @@ export default function Header() {
         </>
     )
 }
+
+export default Header
