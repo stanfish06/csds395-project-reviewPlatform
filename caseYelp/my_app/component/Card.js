@@ -147,7 +147,7 @@ function ProductAddToCart(_store) {
                   bg: 'blue.500',
                 }}
                 onClick={() => router.push(`/store?id=${storeId}`)}>
-              Check it out!
+              View store
             </Button>
           </chakra.a>
         </Tooltip>
