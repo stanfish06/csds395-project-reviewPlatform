@@ -108,7 +108,7 @@ const Header = () => {
     }
     return (
         <>
-            <Flex as='nav' align='center' justify='space-between' wrap='wrap' padding='1rem' bg='#0a304e' color='white' marginBotton='2rem' boxShadow='2xl'>
+            <Flex as='nav' align='center' justify='space-between' wrap='wrap' padding='1rem' bg='#0a304e' color='white' marginBotton='2rem' boxShadow='Base'>
                 <Flex align='center' mr={10}>
                     <Heading as='h1' size='lg' letterSpacing={'-.1rem'}>
                         CaseYelp
