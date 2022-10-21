@@ -82,7 +82,7 @@ import {
 export default function NavItem(navSize) {
     const active = navSize.navSize === 'expand'
     const sidebar = [
-        { name: 'Home', icon: FiHome , link: '/'},
+        { name: 'Home', icon: FiHome , link: '/home'},
         { name: 'My questions', icon: RiQuestionLine, link: '/'},
         { name: 'My reviews', icon: VscPreview, link: '/'},
         { name: 'Ask a question', icon: RiQuestionAnswerFill, link: '/'},
