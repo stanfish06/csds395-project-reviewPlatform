@@ -94,6 +94,8 @@ model Notification {
 model Review {
   reviewId   Int      @id @default(autoincrement())
   reviewAt   DateTime @default(now())
+  review     String
+  authorName String
   userId     String
   score      Int      @default(0)
   storeId    Int

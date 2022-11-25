@@ -58,37 +58,17 @@ import {
     FiTag,
 } from 'react-icons/fi';
 import { useRouter } from 'next/router'
+import { getSession } from "next-auth/react";
 
-const Header = () => {
+const Header = (tagContent) => {
     const { isOpen, onOpen, onClose } = useDisclosure()
     const btnRef = React.useRef()
     const router = useRouter()
     const [tags, setTags] = useState([])
     //const [alltags, setAlltags] = useState(_alltags)
 
-    const fetchTags = async () => {
-        console.log('stan')
-        const response = await fetch('/api/tag')
-        const data = await response.json()
-        const alltags = data[1]
-        const userTags = data[0][0].tags
-
-        const map = new Map();
-        console.log(data[0][0].tags)
-        for (let i = 0; i < userTags.length; i++) {
-            map.set(userTags[i].tagId, i)
-        }
-        for (let i = 0; i < alltags.length; i++) {
-            if (map.has(alltags[i].tagId)) {
-                alltags[i].selected = true
-            }
-            else {
-                alltags[i].selected = false
-            }
-        }
-        console.log(alltags)
-
-        setTags(alltags)
+    const handleOpen = async () => {
+        setTags(tagContent.tagContent)
         onOpen();
     }
 
@@ -125,7 +105,7 @@ const Header = () => {
                     <option value='option7'>Japanese</option>
                 </Select>
                 <ButtonGroup gap='1'>
-                    <IconButton color='black' icon={<FiTag />} onClick={fetchTags}></IconButton>
+                    <IconButton color='black' icon={<FiTag />} onClick={handleOpen}></IconButton>
                     <IconButton color='black' icon={<BellIcon />}></IconButton>
                     <Menu>
                         <MenuButton
@@ -154,7 +134,7 @@ const Header = () => {
                         placement='right'
                         onClose={onClose}
                         finalFocusRef={btnRef}
-                        onOpen={fetchTags}
+                        onOpen={handleOpen}
                     >
                         <DrawerOverlay />
                         <DrawerContent>

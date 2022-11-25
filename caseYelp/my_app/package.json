@@ -11,15 +11,21 @@
   "dependencies": {
     "@chakra-ui/icons": "^2.0.10",
     "@chakra-ui/react": "^2.3.4",
-    "@emotion/react": "^11.10.4",
-    "@emotion/styled": "^11.10.4",
+    "@emotion/react": "^11.10.5",
+    "@emotion/styled": "^11.10.5",
+    "@mui/material": "^5.10.14",
     "@prisma/client": "^4.4.0",
+    "form-data": "^4.0.0",
+    "formik": "^2.2.9",
     "framer-motion": "^6.5.1",
     "next": "^12.3.1",
     "next-auth": "^4.15.0",
     "react": "18.2.0",
     "react-dom": "18.2.0",
-    "react-icons": "^4.4.0"
+    "react-hook-form": "^7.39.4",
+    "react-hook-form-resolvers": "^0.0.1",
+    "react-icons": "^4.4.0",
+    "yup": "^0.32.11"
   },
   "devDependencies": {
     "eslint": "8.24.0",

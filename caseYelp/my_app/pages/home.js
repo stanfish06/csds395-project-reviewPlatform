@@ -60,11 +60,13 @@ import {
 import CardPage from '../component/CardPage';
 import { getSession } from "next-auth/react";
 
-function Home({ stores }) {
+function Home({ stores, _alltags }) {
   const [allStores, setAllStores] = useState(stores);
+  const [alltags, setAlltags] = useState(_alltags);
+  console.log(alltags)
   return (
     <>
-      <Header />
+      <Header tagContent={alltags}/>
       <Flex flexDir='row' width='100%'>
         <Sidebar />
         <CardPage _allStores={allStores} />
@@ -138,8 +140,41 @@ export const getServerSideProps = async ({ req, res }) => {
     }
   }
 
-  console.log(stores)
-  return { props: { stores } }
+  const tags = await prisma.User.findMany({
+    where: {
+      caseId: case_id,
+    },
+    select: {
+      tags: {
+        select: {
+          tagId: true,
+          tagName: true,
+        }
+      },
+    },
+  })
+  const alltags = await prisma.Tag.findMany({
+    distinct: ['tagId'],
+    select: {
+      tagId: true,
+      tagName: true,
+    },
+  })
+  const userTags = tags[0].tags
+
+  for (let i = 0; i < userTags.length; i++) {
+    map.set(userTags[i].tagId, i)
+  }
+  for (let i = 0; i < alltags.length; i++) {
+    if (map.has(alltags[i].tagId)) {
+      alltags[i].selected = true
+    }
+    else {
+      alltags[i].selected = false
+    }
+  }
+  const _alltags = alltags
+  return { props: { stores, _alltags } }
 }
 
 export default Home;

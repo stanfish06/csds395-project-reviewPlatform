@@ -14,12 +14,14 @@ import {
   Text,
   VStack
 } from '@chakra-ui/react';
+import { getSession } from "next-auth/react";
+import { Field, Form, Formik, select } from 'formik';
 
 // only the framework of the detail page, TODO: split into components and make it functional
 function DetailPage() {
   return (
     <>
-    <Center>
+    <Flex pos='sticky' width='100%' flexDir='column' justify='center' boxShadow='inner' bg='grey100' align='center'>
       <VStack spacing='24px'>
         <Box> 
           <HStack spacing='24px'>
@@ -152,7 +154,7 @@ function DetailPage() {
           </VStack>
         </Box>
       </VStack>
-    </Center>
+    </Flex>
     </>
   )
 }
