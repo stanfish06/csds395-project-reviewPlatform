@@ -75,8 +75,10 @@ const Header = (tagContent) => {
     const submitTags = async () => {
         const response = await fetch('/api/tag', {
             method: 'POST',
-            body: tags,
+            body: JSON.stringify(tags),
         })
+        onClose();
+        router.reload(router.pathname)
     }
 
     const changeSelectStatus = async (tagid) => {
@@ -191,7 +193,7 @@ const Header = (tagContent) => {
                                 <Button variant='outline' mr={3} onClick={onClose}>
                                     Cancel
                                 </Button>
-                                <Button colorScheme='blue'>Save</Button>
+                                <Button colorScheme='blue' onClick={submitTags} href={'/home'}>Save</Button>
                             </DrawerFooter>
                         </DrawerContent>
                     </Drawer>
