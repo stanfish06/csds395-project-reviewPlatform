@@ -48,6 +48,18 @@ function FormikExample({ stores, _alltags, userInf }) {
     return error;
   }
 
+  const submitQuestion = async (questionContent, userId, storeId, userName) => {
+    const response = await fetch('/api/question', {
+        method: 'POST',
+        body: JSON.stringify({
+            questionContent: questionContent,
+            storeId: storeId,
+            userId: userId,
+            publisherName: userName,
+        }),
+    })
+}
+
   return (
     <>
       <Header tagContent={alltags} _userInf={userInf} />
@@ -71,7 +83,8 @@ function FormikExample({ stores, _alltags, userInf }) {
               })}
               onSubmit={(values, actions) => {
                 setTimeout(() => {
-                  alert(JSON.stringify(values, null, 2));
+                  submitQuestion(values.Question, userInf.UserId, values.Store, userInf.Name)
+                //  alert(JSON.stringify(values, null, 2));
                   actions.setSubmitting(false);
                 }, 1000);
               }}
@@ -89,7 +102,7 @@ function FormikExample({ stores, _alltags, userInf }) {
                             Select a store{" "}
                           </option>
                           {stores.map((store) => (
-                            <option>{store.storeName}</option>
+                            <option value={store.storeId}>{store.storeName}</option>
                           ))}
                         </Field>
 
