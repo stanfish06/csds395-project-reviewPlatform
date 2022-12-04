@@ -63,13 +63,12 @@ import { getSession } from "next-auth/react";
 function Home({ stores, _alltags }) {
   const [allStores, setAllStores] = useState(stores);
   const [alltags, setAlltags] = useState(_alltags);
-  console.log(alltags)
   return (
     <>
-      <Header tagContent={alltags}/>
+      <Header tagContent={alltags} />
       <Flex flexDir='row' width='100%'>
         <Sidebar />
-        <CardPage _allStores={allStores} />
+        <CardPage _allStores={allStores} allTags={alltags}/>
       </Flex>
     </>
   )
@@ -166,6 +165,7 @@ export const getServerSideProps = async ({ req, res }) => {
     map.set(userTags[i].tagId, i)
   }
   for (let i = 0; i < alltags.length; i++) {
+    alltags[i].userId = case_id
     if (map.has(alltags[i].tagId)) {
       alltags[i].selected = true
     }

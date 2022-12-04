@@ -32,9 +32,11 @@ import {
 import { Search2Icon, BellIcon, SmallAddIcon } from "@chakra-ui/icons";
 import { FiTag } from "react-icons/fi";
 import { useRouter } from "next/router";
+import { getSession } from "next-auth/react";
 
-function Search({ stores }) {
+function Search({ stores, _alltags }) {
   const [allStores, setAllStores] = useState(stores);
+  const [alltags, setAlltags] = useState(_alltags);
   const { isOpen, onOpen, onClose } = useDisclosure();
   const btnRef = React.useRef();
   const router = useRouter();
@@ -224,13 +226,19 @@ function Search({ stores }) {
       </>
       <Flex flexDir="row" width="100%">
         <Sidebar />
-        <CardPage _allStores={allStores} />
+        <CardPage _allStores={allStores} allTags={alltags} />
       </Flex>
     </>
   );
 }
 
-export const getServerSideProps = async ({ query: { term } }) => {
+export const getServerSideProps = async ({ query: { term }, req }) => {
+  const session = await getSession({ req });
+
+  const case_email = session.user.email
+  const user_image = session.user.image
+  const user_name = session.user.name
+  const case_id = case_email.substr(0, case_email.indexOf('@'));
   const stores_temp = await prisma.Store.findMany({
     where: {
       storeName: {
@@ -258,7 +266,7 @@ export const getServerSideProps = async ({ query: { term } }) => {
 
   const fav_stores_id = await prisma.User.findMany({
     where: {
-      caseId: "zxy441",
+      caseId: case_id,
     },
     select: {
       favStore: {
@@ -282,8 +290,44 @@ export const getServerSideProps = async ({ query: { term } }) => {
     }
   }
 
+  const tags = await prisma.User.findMany({
+    where: {
+      caseId: case_id,
+    },
+    select: {
+      tags: {
+        select: {
+          tagId: true,
+          tagName: true,
+        }
+      },
+    },
+  })
+  const alltags = await prisma.Tag.findMany({
+    distinct: ['tagId'],
+    select: {
+      tagId: true,
+      tagName: true,
+    },
+  })
+  const userTags = tags[0].tags
+
+  for (let i = 0; i < userTags.length; i++) {
+    map.set(userTags[i].tagId, i)
+  }
+  for (let i = 0; i < alltags.length; i++) {
+    alltags[i].userId = case_id
+    if (map.has(alltags[i].tagId)) {
+      alltags[i].selected = true
+    }
+    else {
+      alltags[i].selected = false
+    }
+  }
+  const _alltags = alltags
+
   console.log(stores);
-  return { props: { stores } };
+  return { props: { stores, _alltags } };
 };
 
 export default Search;

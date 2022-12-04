@@ -75,8 +75,10 @@ const Header = (tagContent) => {
     const submitTags = async () => {
         const response = await fetch('/api/tag', {
             method: 'POST',
-            body: tags,
+            body: JSON.stringify(tags),
         })
+        onClose();
+        router.reload(router.pathname)
     }
 
     const changeSelectStatus = async (tagid) => {
@@ -94,16 +96,6 @@ const Header = (tagContent) => {
                         CaseYelp
                     </Heading>
                 </Flex>
-                <Select variant='outline' bg='white' w='1000px' placeholder='Search options' color='black' hidden={router.pathname === '/home' ? '' : 'hidden'} icon={<Search2Icon hidden={router.pathname === '/home' ? '' : 'hidden'} />} >
-                    <option value='option1'>Personal favorites</option>
-                    <option value='option2'>Picked for you</option>
-                    <option value='option3'>Viewed before</option>
-                    <option value='option2'>Local hotspots</option>
-                    <option value='option4'>Chinese</option>
-                    <option value='option5'>Maxican</option>
-                    <option value='option6'>American</option>
-                    <option value='option7'>Japanese</option>
-                </Select>
                 <ButtonGroup gap='1'>
                     <IconButton color='black' icon={<FiTag />} onClick={handleOpen}></IconButton>
                     <IconButton color='black' icon={<BellIcon />}></IconButton>
@@ -191,7 +183,7 @@ const Header = (tagContent) => {
                                 <Button variant='outline' mr={3} onClick={onClose}>
                                     Cancel
                                 </Button>
-                                <Button colorScheme='blue'>Save</Button>
+                                <Button colorScheme='blue' onClick={submitTags} href={'/home'}>Save</Button>
                             </DrawerFooter>
                         </DrawerContent>
                     </Drawer>
