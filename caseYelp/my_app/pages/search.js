@@ -34,7 +34,7 @@ import { FiTag } from "react-icons/fi";
 import { useRouter } from "next/router";
 import { getSession } from "next-auth/react";
 
-function Search({ stores, _alltags }) {
+function Search({ stores, _alltags, userInf }) {
   const [allStores, setAllStores] = useState(stores);
   const [alltags, setAlltags] = useState(_alltags);
   const { isOpen, onOpen, onClose } = useDisclosure();
@@ -134,7 +134,7 @@ function Search({ stores, _alltags }) {
                 variant="unstyled"
               >
                 <Box>
-                  <Avatar size="sm"></Avatar>
+                  <Avatar size='sm' name={userInf.Name} src={userInf.Image}></Avatar>
                 </Box>
               </MenuButton>
               <MenuList color="black">
@@ -239,6 +239,9 @@ export const getServerSideProps = async ({ query: { term }, req }) => {
   const user_image = session.user.image
   const user_name = session.user.name
   const case_id = case_email.substr(0, case_email.indexOf('@'));
+
+  const userInf = { Email: case_email, Image: user_image, Name: user_name, UserId: case_id }
+
   const stores_temp = await prisma.Store.findMany({
     where: {
       storeName: {
@@ -327,7 +330,7 @@ export const getServerSideProps = async ({ query: { term }, req }) => {
   const _alltags = alltags
 
   console.log(stores);
-  return { props: { stores, _alltags } };
+  return { props: { stores, _alltags, userInf } };
 };
 
 export default Search;

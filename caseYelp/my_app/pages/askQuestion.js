@@ -36,7 +36,8 @@ import { getSession } from "next-auth/react";
 import { Field, Form, Formik, select } from 'formik';
 import * as Yup from "yup";
 
-function FormikExample({ stores }) {
+function FormikExample({ stores, _alltags, userInf }) {
+    const [alltags, setAlltags] = useState(_alltags);
     function validateRes(value) {
         console.log(value)
         let error
@@ -52,7 +53,7 @@ function FormikExample({ stores }) {
 
     return (
         <>
-            <Header />
+            <Header tagContent={alltags} _userInf={userInf}/>
             <Flex flexDir='row' width='100%'>
                 <Sidebar />
                 <Flex pos='sticky' width='100%' flexDir='column' justify='center' boxShadow='inner' bg='grey100' align='center'>
@@ -89,7 +90,7 @@ function FormikExample({ stores }) {
                                             </FormControl>
                                         )}
                                     </Field>
-                                    
+
                                     <Field name='Question' as={Input}>
                                         {({ field, form }) => (
                                             <FormControl isInvalid={form.errors.Question && form.touched.Question}>
@@ -125,6 +126,8 @@ export const getServerSideProps = async ({ req, res }) => {
     const user_name = session.user.name
     const case_id = case_email.substr(0, case_email.indexOf('@'));
 
+    const userInf = { Email: case_email, Image: user_image, Name: user_name, UserId: case_id }
+
     await prisma.User.upsert({
         where: {
             caseId: case_id,
@@ -152,8 +155,43 @@ export const getServerSideProps = async ({ req, res }) => {
             features: true,
         },
     })
-    console.log(stores)
-    return { props: { stores } }
+    const map = new Map();
+    const tags = await prisma.User.findMany({
+        where: {
+            caseId: case_id,
+        },
+        select: {
+            tags: {
+                select: {
+                    tagId: true,
+                    tagName: true,
+                }
+            },
+        },
+    })
+    const alltags = await prisma.Tag.findMany({
+        distinct: ['tagId'],
+        select: {
+            tagId: true,
+            tagName: true,
+        },
+    })
+    const userTags = tags[0].tags
+
+    for (let i = 0; i < userTags.length; i++) {
+        map.set(userTags[i].tagId, i)
+    }
+    for (let i = 0; i < alltags.length; i++) {
+        alltags[i].userId = case_id
+        if (map.has(alltags[i].tagId)) {
+            alltags[i].selected = true
+        }
+        else {
+            alltags[i].selected = false
+        }
+    }
+    const _alltags = alltags
+    return { props: { stores, _alltags, userInf } }
 }
 
 export default FormikExample;

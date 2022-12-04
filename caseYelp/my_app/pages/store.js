@@ -29,7 +29,9 @@ import { Field, Form, Formik, select } from 'formik';
 import * as Yup from "yup";
 import FormData from 'form-data';
 
-const storeDetail = ({ store, userInfor, reviews }) => {
+const storeDetail = ({ store, userInf, _alltags, reviews }) => {
+    const [alltags, setAlltags] = useState(_alltags);
+    const router = useRouter()
     const {
         storeId,
         storeName,
@@ -40,24 +42,17 @@ const storeDetail = ({ store, userInfor, reviews }) => {
         features,
         users,
         history,
-        questions,
         Textarea,
     } = store
 
     const {
-        userName,
-        caseId
-    } = userInfor
+        Name,
+        UserId
+    } = userInf
 
     console.log(reviews)
 
     const submitReview = async (reviewContent, rate, userId, storeId, userName) => {
-        const formData = new FormData();
-
-        formData.append("userId", userId);
-        formData.append("score", rate);
-        formData.append("review", reviewContent);
-        formData.append("storeId", storeId);
         const response = await fetch('/api/review', {
             method: 'POST',
             body: JSON.stringify({
@@ -68,11 +63,12 @@ const storeDetail = ({ store, userInfor, reviews }) => {
                 userName: userName
             }),
         })
+        router.reload(router.pathname)
     }
 
     return (
         <>
-            <Header />
+            <Header tagContent={alltags} _userInf={userInf}/>
             <Flex flexDir='row' width='100%'>
                 <Sidebar />
                 <Flex pos='sticky' width='100%' flexDir='column' justify='center' boxShadow='inner' bg='grey100' align='center'>
@@ -162,10 +158,8 @@ const storeDetail = ({ store, userInfor, reviews }) => {
                                             Rate: Yup.string().required("Rating cannot be empty")
                                         })}
                                         onSubmit={(values, actions) => {
-                                            submitReview(values.Review, values.Rate, caseId, storeId, userName)
+                                            submitReview(values.Review, values.Rate, UserId, storeId, Name)
                                             setTimeout(() => {
-
-                                                alert(JSON.stringify(values, null, 2))
                                                 actions.setSubmitting(false)
                                             }, 1000)
                                         }}>
@@ -285,7 +279,7 @@ export async function getServerSideProps({ req, res, query }) {
     const user_name = session.user.name
     const case_id = case_email.substr(0, case_email.indexOf('@'));
 
-    const userInfor = { caseId: case_id, userName: user_name }
+    const userInf = {Email: case_email, Image: user_image, Name: user_name, UserId: case_id}
 
     const { id } = query;
     const storeId = parseInt(id)
@@ -302,7 +296,6 @@ export async function getServerSideProps({ req, res, query }) {
                 },
             },
             features: true,
-            questions: true,
         },
     })
     const reviews = await prisma.Review.findMany({
@@ -315,7 +308,43 @@ export async function getServerSideProps({ req, res, query }) {
             score: true
         }
     })
-    return { props: { store, userInfor, reviews } }
+    const map = new Map();
+    const tags = await prisma.User.findMany({
+        where: {
+          caseId: case_id,
+        },
+        select: {
+          tags: {
+            select: {
+              tagId: true,
+              tagName: true,
+            }
+          },
+        },
+      })
+      const alltags = await prisma.Tag.findMany({
+        distinct: ['tagId'],
+        select: {
+          tagId: true,
+          tagName: true,
+        },
+      })
+      const userTags = tags[0].tags
+    
+      for (let i = 0; i < userTags.length; i++) {
+        map.set(userTags[i].tagId, i)
+      }
+      for (let i = 0; i < alltags.length; i++) {
+        alltags[i].userId = case_id
+        if (map.has(alltags[i].tagId)) {
+          alltags[i].selected = true
+        }
+        else {
+          alltags[i].selected = false
+        }
+      }
+      const _alltags = alltags
+    return { props: { store, userInf, _alltags, reviews } }
 }
 
 export default storeDetail;
