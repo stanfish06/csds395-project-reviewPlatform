@@ -1,8 +1,19 @@
 import React, { useState, useParams } from "react";
 import Sidebar from "../component/Sidebar";
 import prisma from "/lib/prisma";
-import { Flex } from "@chakra-ui/react";
+import {
+  Center,
+  Flex,
+  Modal,
+  ModalContent,
+  ModalOverlay,
+  Popover,
+  PopoverContent,
+  Portal,
+} from "@chakra-ui/react";
+import Header from "../component/Header";
 import CardPage from "../component/CardPage";
+import QuestionCardPage from "../component/QuestionCardPage";
 import {
   Box,
   IconButton,
@@ -34,8 +45,9 @@ import { FiTag } from "react-icons/fi";
 import { useRouter } from "next/router";
 import { getSession } from "next-auth/react";
 
-function Search({ stores, _alltags, userInf }) {
+function Search({ stores, _alltags, questions, userInf }) {
   const [allStores, setAllStores] = useState(stores);
+  const [allQuestions, setAllQuestions] = useState(questions);
   const [alltags, setAlltags] = useState(_alltags);
   const { isOpen, onOpen, onClose } = useDisclosure();
   const btnRef = React.useRef();
@@ -77,25 +89,11 @@ function Search({ stores, _alltags, userInf }) {
   };
   return (
     <>
-      <>
-        <Flex
-          as="nav"
-          align="center"
-          justify="space-between"
-          wrap="wrap"
-          padding="1rem"
-          bg="#0a304e"
-          color="white"
-          marginBotton="2rem"
-          boxShadow="Base"
-        >
-          <Flex align="center" mr={10}>
-            <Heading as="h1" size="lg" letterSpacing={"-.1rem"}>
-              CaseYelp
-            </Heading>
-          </Flex>
+      <Header tagContent={alltags} _userInf={userInf} />
+      <Popover isOpen="true">
+        <PopoverContent w="full" ml="300" mr="300" mt="4">
           <form
-            style={{ width: "70%" }}
+            style={{ width: "100%" }}
             id="keywordSearch"
             onSubmit={handleSubmit}
           >
@@ -119,114 +117,12 @@ function Search({ stores, _alltags, userInf }) {
               </InputRightElement>
             </InputGroup>
           </form>
-          <ButtonGroup gap="1">
-            <IconButton
-              color="black"
-              icon={<FiTag />}
-              onClick={fetchTags}
-            ></IconButton>
-            <IconButton color="black" icon={<BellIcon />}></IconButton>
-            <Menu>
-              <MenuButton
-                color="black"
-                as={IconButton}
-                aria-label="Options"
-                variant="unstyled"
-              >
-                <Box>
-                  <Avatar size='sm' name={userInf.Name} src={userInf.Image}></Avatar>
-                </Box>
-              </MenuButton>
-              <MenuList color="black">
-                <MenuItem onClick={() => router.push("/profile")}>
-                  My account
-                </MenuItem>
-                <MenuItem>My tags</MenuItem>
-              </MenuList>
-            </Menu>
-
-            <Drawer
-              isOpen={isOpen}
-              placement="right"
-              onClose={onClose}
-              finalFocusRef={btnRef}
-              onOpen={fetchTags}
-            >
-              <DrawerOverlay />
-              <DrawerContent>
-                <DrawerCloseButton />
-                <DrawerHeader>Tag</DrawerHeader>
-
-                <DrawerBody>
-                  <Box>
-                    {tags.map((tag) =>
-                      tag.selected ? (
-                        <Tag
-                          size="sm"
-                          key={tag.tagId}
-                          borderRadius="full"
-                          variant="solid"
-                          colorScheme="green"
-                          mr={1}
-                        >
-                          <TagLabel>{tag.tagName}</TagLabel>
-                          <TagCloseButton
-                            onClick={() => {
-                              setTags(
-                                tags.map((item) =>
-                                  item.tagId === tag.tagId
-                                    ? { ...item, selected: false }
-                                    : { ...item }
-                                )
-                              );
-                            }}
-                          />
-                        </Tag>
-                      ) : (
-                        <Tag
-                          size="sm"
-                          key={tag.tagId}
-                          borderRadius="full"
-                          variant="solid"
-                          colorScheme="red"
-                          mr={1}
-                        >
-                          <TagLabel>{tag.tagName}</TagLabel>
-                          <IconButton
-                            color="black"
-                            icon={<SmallAddIcon />}
-                            size="24px"
-                            ml={2}
-                            onClick={() => {
-                              setTags(
-                                tags.map((item) =>
-                                  item.tagId === tag.tagId
-                                    ? { ...item, selected: true }
-                                    : { ...item }
-                                )
-                              );
-                            }}
-                          />
-                        </Tag>
-                      )
-                    )}
-                  </Box>
-                </DrawerBody>
-
-                <DrawerFooter>
-                  <Button variant="outline" mr={3} onClick={onClose}>
-                    Cancel
-                  </Button>
-                  <Button colorScheme="blue">Save</Button>
-                </DrawerFooter>
-              </DrawerContent>
-            </Drawer>
-          </ButtonGroup>
-        </Flex>
-      </>
+        </PopoverContent>
+      </Popover>
       <Flex flexDir="row" width="100%">
         <Sidebar />
         <CardPage _allStores={allStores} allTags={alltags} />
+        <QuestionCardPage _allQuestions={allQuestions} />
       </Flex>
     </>
   );
@@ -235,13 +131,56 @@ function Search({ stores, _alltags, userInf }) {
 export const getServerSideProps = async ({ query: { term }, req }) => {
   const session = await getSession({ req });
 
-  const case_email = session.user.email
-  const user_image = session.user.image
-  const user_name = session.user.name
-  const case_id = case_email.substr(0, case_email.indexOf('@'));
+  const case_email = session.user.email;
+  const user_image = session.user.image;
+  const user_name = session.user.name;
+  const case_id = case_email.substr(0, case_email.indexOf("@"));
+  const userInf = {
+    Email: case_email,
+    Image: user_image,
+    Name: user_name,
+    UserId: case_id,
+  };
 
-  const userInf = { Email: case_email, Image: user_image, Name: user_name, UserId: case_id }
+  await prisma.User.upsert({
+    where: {
+      caseId: case_id,
+    },
+    create: {
+      caseId: case_id,
+      userName: user_name,
+      profileImage: user_image,
+    },
+    update: {
+      isFirstLogin: false,
+    },
+  });
 
+  // question
+  const questions_temp = await prisma.Question.findMany({
+    where: {
+      question: {
+        contains: term,
+        mode: "insensitive",
+      },
+    },
+    orderBy: { questionId: "asc" },
+    include: {
+      _count: {
+        select: {
+          answers: true,
+        },
+      },
+      askedBy: true,
+      askStore: true,
+    },
+  });
+
+  const questions = questions_temp.map((obj) => ({
+    ...obj,
+  }));
+
+  // store
   const stores_temp = await prisma.Store.findMany({
     where: {
       storeName: {
@@ -256,6 +195,7 @@ export const getServerSideProps = async ({ query: { term }, req }) => {
           history: true,
           users: true,
           reviews: true,
+          questions: true,
         },
       },
       features: true,
@@ -302,35 +242,41 @@ export const getServerSideProps = async ({ query: { term }, req }) => {
         select: {
           tagId: true,
           tagName: true,
-        }
+        },
       },
     },
-  })
+  });
   const alltags = await prisma.Tag.findMany({
-    distinct: ['tagId'],
+    distinct: ["tagId"],
     select: {
       tagId: true,
       tagName: true,
     },
-  })
-  const userTags = tags[0].tags
+  });
+  const userTags = tags[0].tags;
 
   for (let i = 0; i < userTags.length; i++) {
-    map.set(userTags[i].tagId, i)
+    map.set(userTags[i].tagId, i);
   }
   for (let i = 0; i < alltags.length; i++) {
-    alltags[i].userId = case_id
+    alltags[i].userId = case_id;
     if (map.has(alltags[i].tagId)) {
-      alltags[i].selected = true
-    }
-    else {
-      alltags[i].selected = false
+      alltags[i].selected = true;
+    } else {
+      alltags[i].selected = false;
     }
   }
-  const _alltags = alltags
+  const _alltags = alltags;
 
   console.log(stores);
-  return { props: { stores, _alltags, userInf } };
+  return {
+    props: {
+      stores: JSON.parse(JSON.stringify(stores)),
+      _alltags,
+      questions: JSON.parse(JSON.stringify(questions)),
+      userInf,
+    },
+  };
 };
 
 export default Search;
