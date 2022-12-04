@@ -60,12 +60,12 @@ import {
 import CardPage from '../component/CardPage';
 import { getSession } from "next-auth/react";
 
-function Home({ stores, _alltags }) {
+function Home({ stores, _alltags, userInf }) {
   const [allStores, setAllStores] = useState(stores);
   const [alltags, setAlltags] = useState(_alltags);
   return (
     <>
-      <Header tagContent={alltags} />
+      <Header tagContent={alltags} _userInf={userInf}/>
       <Flex flexDir='row' width='100%'>
         <Sidebar />
         <CardPage _allStores={allStores} allTags={alltags}/>
@@ -81,6 +81,8 @@ export const getServerSideProps = async ({ req, res }) => {
   const user_image = session.user.image
   const user_name = session.user.name
   const case_id = case_email.substr(0, case_email.indexOf('@'));
+
+  const userInf = {Email: case_email, Image: user_image, Name: user_name, UserId: case_id}
 
   await prisma.User.upsert({
     where: {
@@ -174,7 +176,7 @@ export const getServerSideProps = async ({ req, res }) => {
     }
   }
   const _alltags = alltags
-  return { props: { stores, _alltags } }
+  return { props: { stores, _alltags, userInf } }
 }
 
 export default Home;

@@ -60,15 +60,21 @@ import {
 import { useRouter } from 'next/router'
 import { getSession } from "next-auth/react";
 
-const Header = (tagContent) => {
+const Header = ({tagContent, _userInf}) => {
     const { isOpen, onOpen, onClose } = useDisclosure()
     const btnRef = React.useRef()
     const router = useRouter()
     const [tags, setTags] = useState([])
     //const [alltags, setAlltags] = useState(_alltags)
 
+    const {
+        Email,
+        Image, 
+        Name,
+        UserId
+    } =  _userInf
     const handleOpen = async () => {
-        setTags(tagContent.tagContent)
+        setTags(tagContent)
         onOpen();
     }
 
@@ -107,7 +113,7 @@ const Header = (tagContent) => {
                             variant='unstyled'
                         >
                             <Box>
-                                <Avatar size='sm'></Avatar>
+                                <Avatar size='sm' name={Name} src={Image}></Avatar>
                             </Box>
                         </MenuButton>
                         <MenuList color='black'>
