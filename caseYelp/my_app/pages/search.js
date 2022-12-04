@@ -3,6 +3,7 @@ import Sidebar from "../component/Sidebar";
 import prisma from "/lib/prisma";
 import { Flex } from "@chakra-ui/react";
 import CardPage from "../component/CardPage";
+import QuestionCardPage from "../component/QuestionCardPage";
 import {
   Box,
   IconButton,
@@ -34,8 +35,9 @@ import { FiTag } from "react-icons/fi";
 import { useRouter } from "next/router";
 import { getSession } from "next-auth/react";
 
-function Search({ stores, _alltags, userInf }) {
+function Search({ stores, _alltags, questions, userInf }) {
   const [allStores, setAllStores] = useState(stores);
+  const [allQuestions, setAllQuestions] = useState(questions);
   const [alltags, setAlltags] = useState(_alltags);
   const { isOpen, onOpen, onClose } = useDisclosure();
   const btnRef = React.useRef();
@@ -134,7 +136,11 @@ function Search({ stores, _alltags, userInf }) {
                 variant="unstyled"
               >
                 <Box>
-                  <Avatar size='sm' name={userInf.Name} src={userInf.Image}></Avatar>
+                  <Avatar
+                    size="sm"
+                    name={userInf.Name}
+                    src={userInf.Image}
+                  ></Avatar>
                 </Box>
               </MenuButton>
               <MenuList color="black">
@@ -227,6 +233,7 @@ function Search({ stores, _alltags, userInf }) {
       <Flex flexDir="row" width="100%">
         <Sidebar />
         <CardPage _allStores={allStores} allTags={alltags} />
+        <QuestionCardPage _allQuestions={allQuestions} />
       </Flex>
     </>
   );
@@ -235,13 +242,42 @@ function Search({ stores, _alltags, userInf }) {
 export const getServerSideProps = async ({ query: { term }, req }) => {
   const session = await getSession({ req });
 
-  const case_email = session.user.email
-  const user_image = session.user.image
-  const user_name = session.user.name
-  const case_id = case_email.substr(0, case_email.indexOf('@'));
+  const case_email = session.user.email;
+  const user_image = session.user.image;
+  const user_name = session.user.name;
+  const case_id = case_email.substr(0, case_email.indexOf("@"));
+  const userInf = {
+    Email: case_email,
+    Image: user_image,
+    Name: user_name,
+    UserId: case_id,
+  };
 
-  const userInf = { Email: case_email, Image: user_image, Name: user_name, UserId: case_id }
+  // question
+  const questions_temp = await prisma.Question.findMany({
+    where: {
+      question: {
+        contains: term,
+        mode: "insensitive",
+      },
+    },
+    orderBy: { questionId: "asc" },
+    include: {
+      _count: {
+        select: {
+          answers: true,
+        },
+      },
+      askedBy: true,
+      askStore: true,
+    },
+  });
 
+  const questions = questions_temp.map((obj) => ({
+    ...obj,
+  }));
+
+  // store
   const stores_temp = await prisma.Store.findMany({
     where: {
       storeName: {
@@ -256,6 +292,7 @@ export const getServerSideProps = async ({ query: { term }, req }) => {
           history: true,
           users: true,
           reviews: true,
+          questions: true,
         },
       },
       features: true,
@@ -302,35 +339,41 @@ export const getServerSideProps = async ({ query: { term }, req }) => {
         select: {
           tagId: true,
           tagName: true,
-        }
+        },
       },
     },
-  })
+  });
   const alltags = await prisma.Tag.findMany({
-    distinct: ['tagId'],
+    distinct: ["tagId"],
     select: {
       tagId: true,
       tagName: true,
     },
-  })
-  const userTags = tags[0].tags
+  });
+  const userTags = tags[0].tags;
 
   for (let i = 0; i < userTags.length; i++) {
-    map.set(userTags[i].tagId, i)
+    map.set(userTags[i].tagId, i);
   }
   for (let i = 0; i < alltags.length; i++) {
-    alltags[i].userId = case_id
+    alltags[i].userId = case_id;
     if (map.has(alltags[i].tagId)) {
-      alltags[i].selected = true
-    }
-    else {
-      alltags[i].selected = false
+      alltags[i].selected = true;
+    } else {
+      alltags[i].selected = false;
     }
   }
-  const _alltags = alltags
+  const _alltags = alltags;
 
   console.log(stores);
-  return { props: { stores, _alltags, userInf } };
+  return {
+    props: {
+      stores: JSON.parse(JSON.stringify(stores)),
+      _alltags,
+      questions: JSON.parse(JSON.stringify(questions)),
+      userInf,
+    },
+  };
 };
 
 export default Search;

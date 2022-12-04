@@ -70,9 +70,13 @@ export default function NavItem(navSize) {
   const active = navSize.navSize === "expand";
   const sidebar = [
     { name: "Home", icon: FiHome, link: "/home" },
-    { name: "My questions", icon: RiQuestionLine, link: "/" },
+    { name: "My questions", icon: RiQuestionLine, link: "/myQuestions" },
     { name: "My reviews", icon: VscPreview, link: "/" },
-    { name: "Ask a question", icon: RiQuestionAnswerFill, link: "/askQuestion" },
+    {
+      name: "Ask a question",
+      icon: RiQuestionAnswerFill,
+      link: "/askQuestion",
+    },
     { name: "Write a review", icon: MdOutlineRateReview, link: "/" },
     { name: "Search resaurants", icon: FiSearch, link: "/search" },
     { name: "Find posts", icon: BsFilePost, link: "/" },
