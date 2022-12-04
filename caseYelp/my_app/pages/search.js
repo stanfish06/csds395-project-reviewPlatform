@@ -266,7 +266,7 @@ export const getServerSideProps = async ({ query: { term }, req }) => {
 
   const fav_stores_id = await prisma.User.findMany({
     where: {
-      caseId: "zxy441",
+      caseId: case_id,
     },
     select: {
       favStore: {
