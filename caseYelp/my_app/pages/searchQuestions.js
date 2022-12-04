@@ -45,8 +45,7 @@ import { FiTag } from "react-icons/fi";
 import { useRouter } from "next/router";
 import { getSession } from "next-auth/react";
 
-function Search({ stores, _alltags, questions, userInf }) {
-  const [allStores, setAllStores] = useState(stores);
+function SearchQuestions({ _alltags, questions, userInf }) {
   const [allQuestions, setAllQuestions] = useState(questions);
   const [alltags, setAlltags] = useState(_alltags);
   const { isOpen, onOpen, onClose } = useDisclosure();
@@ -83,8 +82,8 @@ function Search({ stores, _alltags, questions, userInf }) {
   const handleSubmit = async (event) => {
     event.preventDefault();
     console.log(keyword);
-    router.push(`/search?term=${keyword}`);
-    window.location.replace(`/search?term=${keyword}`);
+    router.push(`/searchQuestions?term=${keyword}`);
+    window.location.replace(`/searchQuestions?term=${keyword}`);
     setKeyword("");
   };
   return (
@@ -101,7 +100,7 @@ function Search({ stores, _alltags, questions, userInf }) {
               <Input
                 variant="outline"
                 bg="white"
-                placeholder="Search for restaurants"
+                placeholder="Search for quesions"
                 color="black"
                 id="searchText"
                 type="text"
@@ -121,7 +120,7 @@ function Search({ stores, _alltags, questions, userInf }) {
       </Popover>
       <Flex flexDir="row" width="100%">
         <Sidebar />
-        <CardPage _allStores={allStores} allTags={alltags} />
+        <QuestionCardPage _allQuestions={allQuestions} />
       </Flex>
     </>
   );
@@ -177,57 +176,7 @@ export const getServerSideProps = async ({ query: { term }, req }) => {
     ...obj,
   }));
 
-  // store
-  const stores_temp = await prisma.Store.findMany({
-    where: {
-      storeName: {
-        contains: term,
-        mode: "insensitive",
-      },
-    },
-    orderBy: { storeId: "asc" },
-    include: {
-      _count: {
-        select: {
-          history: true,
-          users: true,
-          reviews: true,
-        },
-      },
-      features: true,
-    },
-  });
-
-  const stores = stores_temp.map((obj) => ({
-    ...obj,
-    rate: obj._count.reviews == 0 ? 0 : obj.totalScore / obj._count.reviews,
-  }));
-
-  const fav_stores_id = await prisma.User.findMany({
-    where: {
-      caseId: case_id,
-    },
-    select: {
-      favStore: {
-        select: {
-          storeId: true,
-        },
-      },
-    },
-  });
-
   const map = new Map();
-  const userStores = fav_stores_id[0].favStore;
-  for (let i = 0; i < userStores.length; i++) {
-    map.set(userStores[i].storeId, i);
-  }
-  for (let i = 0; i < stores.length; i++) {
-    if (map.has(stores[i].storeId)) {
-      stores[i].fav = true;
-    } else {
-      stores[i].fav = false;
-    }
-  }
 
   const tags = await prisma.User.findMany({
     where: {
@@ -264,10 +213,8 @@ export const getServerSideProps = async ({ query: { term }, req }) => {
   }
   const _alltags = alltags;
 
-  console.log(stores);
   return {
     props: {
-      stores: JSON.parse(JSON.stringify(stores)),
       _alltags,
       questions: JSON.parse(JSON.stringify(questions)),
       userInf,
@@ -275,4 +222,4 @@ export const getServerSideProps = async ({ query: { term }, req }) => {
   };
 };
 
-export default Search;
+export default SearchQuestions;
