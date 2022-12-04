@@ -20,7 +20,7 @@
     "framer-motion": "^6.5.1",
     "next": "^12.3.1",
     "next-auth": "^4.15.0",
-    "react": "18.2.0",
+    "react": "^18.2.0",
     "react-dom": "18.2.0",
     "react-hook-form": "^7.39.4",
     "react-hook-form-resolvers": "^0.0.1",
