@@ -90,12 +90,7 @@ function Search({ stores, _alltags, questions, userInf }) {
   return (
     <>
       <Header tagContent={alltags} _userInf={userInf} />
-      <Popover
-        isOpen="true"
-        placement="top-start"
-        width="100%"
-        alignItems="center"
-      >
+      <Popover isOpen="true">
         <PopoverContent w="full" ml="300" mr="300" mt="4">
           <form
             style={{ width: "100%" }}
@@ -124,8 +119,6 @@ function Search({ stores, _alltags, questions, userInf }) {
           </form>
         </PopoverContent>
       </Popover>
-
-      <Portal></Portal>
       <Flex flexDir="row" width="100%">
         <Sidebar />
         <CardPage _allStores={allStores} allTags={alltags} />
