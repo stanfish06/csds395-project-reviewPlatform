@@ -79,7 +79,7 @@ export default function NavItem(navSize) {
     },
     { name: "Write a review", icon: MdOutlineRateReview, link: "/" },
     { name: "Search resaurants", icon: FiSearch, link: "/search" },
-    { name: "Find posts", icon: BsFilePost, link: "/" },
+    { name: "Search questions", icon: BsFilePost, link: "/searchQuestions" },
   ];
   return (
     <Flex
