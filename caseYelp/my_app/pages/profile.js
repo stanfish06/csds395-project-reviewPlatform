@@ -1,3 +1,5 @@
+import React, { useState } from 'react';
+import prisma from '/lib/prisma';
 import {
     Heading,
     Avatar,
@@ -7,14 +9,24 @@ import {
     Flex,
     Text,
     Stack,
-    Button,
     Badge,
     useColorModeValue,
 } from '@chakra-ui/react';
 import Header from "../component/Header";
 import Sidebar from "../component/Sidebar";
+import { getSession } from "next-auth/react";
 
-export default function SocialProfileWithImage() {
+function Profile({ userInf }) {
+    const { 
+        Email,
+        Image,
+        Name,
+        UserId,
+        Time,
+        Tag,
+        NumHistory,
+        NumReview,
+    } = userInf
     return (
         <>
             <Header />
@@ -39,7 +51,7 @@ export default function SocialProfileWithImage() {
                             <Avatar
                                 size={'xl'}
                                 src={
-                                    'https://media.istockphoto.com/vectors/user-avatar-profile-icon-black-vector-illustration-vector-id1209654046?s=612x612'
+                                    '{Image}'
                                 }
                                 alt={'Author'}
                                 css={{
@@ -51,22 +63,22 @@ export default function SocialProfileWithImage() {
                         <Box p={6}>
                             <Stack spacing={0} align={'center'} mb={5}>
                                 <Heading fontSize={'2xl'} fontWeight={500} fontFamily={'body'}>
-                                    Yangheng Jizhe
+                                  {Name}
                                 </Heading>
-                                <Text color={'gray.500'}>yxj432</Text>
+                              <Text color={'gray.500'}>{ UserId}</Text>
                             </Stack>
 
                             <Stack direction={'row'} justify={'center'} spacing={6}>
                                 <Stack spacing={0} align={'center'}>
-                                    <Text fontWeight={600}>666k</Text>
+                                  <Text fontWeight={600}>{NumReview}</Text>
                                     <Text fontSize={'sm'} color={'gray.500'}>
                                         reviews
                                     </Text>
                                 </Stack>
                                 <Stack spacing={0} align={'center'}>
-                                    <Text fontWeight={600}>666k</Text>
+                                  <Text fontWeight={600}>{NumHistory}</Text>
                                     <Text fontSize={'sm'} color={'gray.500'}>
-                                        photos
+                                        stores visited
                                     </Text>
                                 </Stack>
                             </Stack>
@@ -75,7 +87,7 @@ export default function SocialProfileWithImage() {
                                 <Heading fontSize={'m'} fontWeight={250} fontFamily={'body'}>
                                     joined Case Review since
                                 </Heading>
-                                <Text color={'gray.500'}>2019</Text>
+                              <Text color={'gray.500'}>{Time}</Text>
                             </Stack>
 
                             <Stack spacing={0} align={'center'} mb={5}>
@@ -87,24 +99,13 @@ export default function SocialProfileWithImage() {
                                     py={1}
                                     bg={useColorModeValue('gray.50', 'gray.800')}
                                     fontWeight={'400'}>
-                                    #Mexican food
+                                    {Tag}
                                 </Badge>
                             </Stack>
-
-
-
-                            <Button
-                                w={'full'}
-                                mt={8}
-                                bg={useColorModeValue('#151f21', 'gray.900')}
-                                color={'white'}
-                                rounded={'md'}
-                                _hover={{
-                                    transform: 'translateY(-2px)',
-                                    boxShadow: 'lg',
-                                }}>
-                                Not your fav? Click to change.
-                            </Button>
+                            
+                            <Link href='/home' isExternal>
+                                 Not your fav? Click to change<ExternalLInkIcon mx = '2px' />
+                            </Link>
                         </Box>
                     </Box>
                 </Center>
@@ -112,3 +113,45 @@ export default function SocialProfileWithImage() {
         </>
     );
 }
+
+export const getServerSideProps = async ({ req, res }) => {
+    const session = await getSession({ req });
+
+    const case_email = session.user.email
+    const user_image = session.user.image
+    const user_name = session.user.name
+    const user_tag = session.user.tags
+    const user_createTime = session.user.createTime
+    const case_id = case_email.substr(0, case_email.indexOf('@'));
+
+    const numReview = await prisma.User.findMany({
+        where: {
+            caseId: case_id,
+        },
+        include: {
+            _count: {
+                select: {
+                    reviews: true,
+                }
+            }
+        } 
+    })
+
+    const numHistory = await prisma.User.findMany({
+        where: {
+            caseId: case_id,
+        },
+        include: {
+            _count: {
+                select: {
+                    viewHistory: true,
+                }
+            }
+        } 
+    })
+    
+    const userInf = { Email: case_email, Image: user_image, Name: user_name, UserId: case_id, Time: user_createTime, Tag: user_tag, NumHistory: numHistory, NumReview: numReview }
+    
+    return { props: { userInf } }
+}
+export default Profile;
