@@ -11,6 +11,7 @@ import {
     HStack,
     Button,
     Spacer,
+    Icon,
     Badge,
     useColorModeValue,
     Input,
@@ -29,6 +30,8 @@ import { getSession } from "next-auth/react";
 import { Field, Form, Formik, select } from 'formik';
 import * as Yup from "yup";
 import FormData from 'form-data';
+import { BsStar, BsStarFill, BsStarHalf } from 'react-icons/bs';
+import { TiHeartOutline, TiHeart } from 'react-icons/Ti';
 
 const storeDetail = ({ store, userInf, _alltags, reviews }) => {
     const [alltags, setAlltags] = useState(_alltags);
@@ -42,6 +45,7 @@ const storeDetail = ({ store, userInf, _alltags, reviews }) => {
         totalScore,
         features,
         users,
+        _count,
         history,
         Textarea,
     } = store
@@ -67,48 +71,91 @@ const storeDetail = ({ store, userInf, _alltags, reviews }) => {
         router.reload(router.pathname)
     }
 
+    function ReviewRating({ rating }) {
+        return (
+          <Flex d="flex" alignItems="center" flexDir='row'>
+            {Array(5)
+              .fill('')
+              .map((_, i) => {
+                const roundedRating = Math.round(rating * 2) / 2;
+                if (roundedRating - i >= 1) {
+                  return (
+                    <BsStarFill
+                      key={i}
+                      style={{ marginLeft: '1' }}
+                      color={i < rating ? 'teal.500' : 'gray.300'}
+                    />
+                  );
+                }
+                if (roundedRating - i === 0.5) {
+                  return <BsStarHalf key={i} style={{ marginLeft: '1' }} />;
+                }
+                return <BsStar key={i} style={{ marginLeft: '1' }} />;
+              })}
+          </Flex>
+        );
+      }
+    // const addToFavorites = async (userId, storeId) => {
+    //     const response = await prisma.User.create({
+    //         where: {
+    //             caseId: userId
+    //         },
+    //         data: {
+    //             store: {
+    //                 connect: {
+    //                     favStore: storeId
+    //                 }
+    //             }
+    //         }
+    //     })
+    //     router.reload(router.pathname)
+    // }
+
     return (
         <>
             <Header tagContent={alltags} _userInf={userInf}/>
             <Flex flexDir='row' width='100%'>
                 <Sidebar />
                 <Flex pos='sticky' width='100%' flexDir='column' justify='center' boxShadow='inner' bg='grey100' align='center'>
-                    <VStack spacing='24px'>
-                        <Box>
-                            <HStack spacing='24px'>
-                                <Box>
-                                    <Image src={BurgerIcon} />
-                                </Box>
-                                <Heading as='h1' size='2xl' noOfLines={1}>
+                    <VStack spacing='24px' p='8'>
+                            <HStack spacing='6'>
+                                <Heading as='h1' size='2xl' noOfLines={2}>
                                     {storeName}
                                 </Heading>
+
+                                <Icon as={TiHeartOutline} h={14} w={14}/>
                             </HStack>
-                        </Box>
 
-                        <Box>
+                        <ReviewRating rating = {totalScore / _count.reviews} />
+
+                        <HStack>
+                            {_alltags.map((tag) => (
+                                <Box rounded={'lg'} bg='white' boxShadow={'lg'} p={2}>
+                                    <Text>
+                                        {tag.tagName}
+                                    </Text>
+                                </Box>
+                            ))}
+                        </HStack>
+
+                        <Box rounded={'lg'} bg='white' boxShadow={'lg'} p={2}>
                             <Text>
-                                {location}
+                                {website}
                             </Text>
                         </Box>
 
-                        <Box>
-                            <Text color='green'>
-                                Open (10AM - 8PM)
-                            </Text>
-                        </Box>
-
-                        <Box>
-                            <Text>
-                                CaseCash? X
-                            </Text>
-                        </Box>
-
-                        <Box>
-                            <VStack spacing='24px' align='left'>
+                        <Box rounded={'lg'} bg='white' boxShadow={'lg'} p={2}>
+                            <HStack spacing='24px'>
                                 <Text>
-                                    [Menu] (Example)
+                                    {location}
                                 </Text>
-                            </VStack>
+                                <Text>
+                                     • 
+                                </Text>
+                                <Text>
+                                    {phoneNum}
+                                </Text>
+                            </HStack>
                         </Box>
 
                         <Box>
@@ -118,7 +165,9 @@ const storeDetail = ({ store, userInf, _alltags, reviews }) => {
                                         initialValues={{ Review: "", Rate: "" }}
                                         validationSchema={Yup.object({
                                             Review: Yup.string().required("Review cannot be empty"),
-                                            Rate: Yup.string().required("Rating cannot be empty")
+                                            Rate: Yup.string()
+                                            .required("Rating cannot be empty")
+                                            .oneOf(['0','1','2','3','4','5'])
                                         })}
                                         onSubmit={(values, actions) => {
                                             submitReview(values.Review, values.Rate, UserId, storeId, Name)
@@ -172,13 +221,15 @@ const storeDetail = ({ store, userInf, _alltags, reviews }) => {
 
                                 <VStack spacing='24px'>
                                     {reviews.map((review) => (
-                                    <VStack align="left" justify="center" spacing='12px'>
-                                        <HStack spacing='16px'>
-                                            <Text>{review.authorName}</Text>
-                                            <Text>{review.score}</Text>
-                                        </HStack>
-                                        <Text >{review.review}</Text>
-                                    </VStack>
+                                        <VStack align="left" justify="center" spacing='12px' minWidth = '900px' maxWidth='900px'>
+                                                <Box rounded={'lg'} bg='white' boxShadow={'lg'} p={8}>
+                                                <HStack spacing='16px'>
+                                                    <Text>{review.authorName}</Text>
+                                                    <ReviewRating rating={review.score} />
+                                                </HStack>
+                                                <Text>{review.review}</Text>
+                                            </Box>
+                                        </VStack>
                                     ))}
                                 </VStack>
                             </VStack>
