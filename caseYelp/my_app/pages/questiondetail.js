@@ -18,7 +18,9 @@ import {
     FormControl,
     FormLabel,
     FormErrorMessage,
-    useBoolean
+    useBoolean,
+    Tooltip,
+    chakra
 } from '@chakra-ui/react';
 import Header from "../component/Header";
 import Sidebar from "../component/Sidebar";
@@ -34,19 +36,21 @@ import FormData from 'form-data';
 import { BsStar, BsStarFill, BsStarHalf } from 'react-icons/bs';
 import { TiHeartOutline, TiHeart } from 'react-icons/Ti';
 
-const questionDetail = ({ _question, userInf, answers}) => {
+const questionDetail = ({ _question, question_inf, userInf, answers, _alltags }) => {
     const router = useRouter();
     const { 
         questionId, 
-        question, 
-        answers, 
-        numAnswers, 
+        question 
+    } = question_inf;
+    const { 
         _count 
     } = _question;
+    const numAnswers = _count.answers
     const {
         Name,
         UserId
     } = userInf
+    const [alltags, setAlltags] = useState(_alltags);
 
     function Answers({ answers, numAnswers }) {
         if (numAnswers == 0) {
@@ -217,17 +221,57 @@ export async function getServerSideProps({ req, res, query }) {
     const _question = await prisma.Question.findUnique({
         where: {
             questionId: questionId,
+        },
+        include: {
+            _count: {
+                select: {
+                  answers: true,
+                },
+            },
         }
     })
+
+    _question.askedAt = JSON.stringify(_question.askedAt)
+    console.log(_question)
+
+    const question_inf = await prisma.Question.findUnique({
+        where: {
+            questionId: questionId,
+        },
+        select: {
+            questionId: true,
+            question: true,
+            storeId: true,
+            storeName: true,
+            userId: true,
+            publisherName: true
+        }
+    })
+
     const answers = await prisma.Answer.findMany({
         where: {
             questionId: questionId
         },
         select: {
             answer: true,
-            authorName: true,
+            publisherName: true,
         }
     })
+
+    const map = new Map();
+    const tags = await prisma.User.findMany({
+        where: {
+          caseId: case_id,
+        },
+        select: {
+          tags: {
+            select: {
+              tagId: true,
+              tagName: true,
+            }
+          },
+        },
+      })
 
     const alltags = await prisma.Tag.findMany({
         distinct: ['tagId'],
@@ -252,6 +296,6 @@ export async function getServerSideProps({ req, res, query }) {
     }
     const _alltags = alltags
 
-    return { props: { question, userInf, _alltags, answers } }
+    return { props: { _question, question_inf, userInf, _alltags, answers } }
 }
 export default questionDetail;
