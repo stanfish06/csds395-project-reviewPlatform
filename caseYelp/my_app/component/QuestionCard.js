@@ -59,7 +59,8 @@ const data = {
 //     );
 //   }
 
-function Answers({ answers, numAnswers }) {
+function Answers({ answers, numAnswers, questionId }) {
+  const router = useRouter()
   if (numAnswers == 0) {
     return (
       <chakra.a href={"#"} display={"flex"}>
@@ -101,7 +102,7 @@ function Answers({ answers, numAnswers }) {
           _focus={{
             bg: "blue.500",
           }}
-          onClick={() => router.push(`/question?id=${questionId}`)}
+          onClick={() => router.push(`/questiondetail?id=${questionId}`)}
         >
           View {numAnswers} answers
         </Button>
@@ -160,7 +161,7 @@ function ProductAddToCart(_question) {
             color={"gray.800"}
             fontSize={"1.2em"}
           >
-            <Answers answers={answers} numAnswers={_count.answers} />
+            <Answers answers={answers} numAnswers={_count.answers} questionId={questionId} />
           </Tooltip>
         </Flex>
       </Box>
