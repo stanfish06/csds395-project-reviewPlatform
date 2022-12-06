@@ -17,7 +17,8 @@ import {
     Input,
     FormControl,
     FormLabel,
-    FormErrorMessage
+    FormErrorMessage,
+    useBoolean
 } from '@chakra-ui/react';
 import Header from "../component/Header";
 import Sidebar from "../component/Sidebar";
@@ -48,14 +49,14 @@ const storeDetail = ({ store, userInf, _alltags, reviews }) => {
         _count,
         history,
         Textarea,
+        fav,
     } = store
+    const [flag, setFlag] = useBoolean(fav)
 
     const {
         Name,
         UserId
     } = userInf
-
-    console.log(reviews)
 
     const submitReview = async (reviewContent, rate, userId, storeId, userName) => {
         const response = await fetch('/api/review', {
@@ -71,30 +72,42 @@ const storeDetail = ({ store, userInf, _alltags, reviews }) => {
         router.reload(router.pathname)
     }
 
+    const submitFav = async (storeId, userId) => {
+        const response = await fetch('/api/addToFav', {
+            method: 'POST',
+            body: JSON.stringify({
+                userId: userId,
+                storeId: storeId,
+                add: !flag,
+            }),
+        })
+        router.reload(router.pathname)
+    }
+
     function ReviewRating({ rating }) {
         return (
-          <Flex d="flex" alignItems="center" flexDir='row'>
-            {Array(5)
-              .fill('')
-              .map((_, i) => {
-                const roundedRating = Math.round(rating * 2) / 2;
-                if (roundedRating - i >= 1) {
-                  return (
-                    <BsStarFill
-                      key={i}
-                      style={{ marginLeft: '1' }}
-                      color={i < rating ? 'teal.500' : 'gray.300'}
-                    />
-                  );
-                }
-                if (roundedRating - i === 0.5) {
-                  return <BsStarHalf key={i} style={{ marginLeft: '1' }} />;
-                }
-                return <BsStar key={i} style={{ marginLeft: '1' }} />;
-              })}
-          </Flex>
+            <Flex d="flex" alignItems="center" flexDir='row'>
+                {Array(5)
+                    .fill('')
+                    .map((_, i) => {
+                        const roundedRating = Math.round(rating * 2) / 2;
+                        if (roundedRating - i >= 1) {
+                            return (
+                                <BsStarFill
+                                    key={i}
+                                    style={{ marginLeft: '1' }}
+                                    color={i < rating ? 'teal.500' : 'gray.300'}
+                                />
+                            );
+                        }
+                        if (roundedRating - i === 0.5) {
+                            return <BsStarHalf key={i} style={{ marginLeft: '1' }} />;
+                        }
+                        return <BsStar key={i} style={{ marginLeft: '1' }} />;
+                    })}
+            </Flex>
         );
-      }
+    }
     // const addToFavorites = async (userId, storeId) => {
     //     const response = await prisma.User.create({
     //         where: {
@@ -113,20 +126,19 @@ const storeDetail = ({ store, userInf, _alltags, reviews }) => {
 
     return (
         <>
-            <Header tagContent={alltags} _userInf={userInf}/>
+            <Header tagContent={alltags} _userInf={userInf} />
             <Flex flexDir='row' width='100%'>
                 <Sidebar />
                 <Flex pos='sticky' width='100%' flexDir='column' justify='center' boxShadow='inner' bg='grey100' align='center'>
                     <VStack spacing='24px' p='8'>
-                            <HStack spacing='6'>
-                                <Heading as='h1' size='2xl' noOfLines={2}>
-                                    {storeName}
-                                </Heading>
+                        <HStack spacing='6'>
+                            <Heading as='h1' size='2xl' noOfLines={2}>
+                                {storeName}
+                            </Heading>
+                            <Icon as={flag ? TiHeart : TiHeartOutline} h={14} w={14} onClick={() => submitFav(storeId, UserId)} _hover={{cursor: "pointer"}}/>
+                        </HStack>
 
-                                <Icon as={TiHeartOutline} h={14} w={14}/>
-                            </HStack>
-
-                        <ReviewRating rating = {totalScore / _count.reviews} />
+                        <ReviewRating rating={totalScore / _count.reviews} />
 
                         <HStack>
                             {_alltags.map((tag) => (
@@ -150,7 +162,7 @@ const storeDetail = ({ store, userInf, _alltags, reviews }) => {
                                     {location}
                                 </Text>
                                 <Text>
-                                     • 
+                                    •
                                 </Text>
                                 <Text>
                                     {phoneNum}
@@ -166,8 +178,8 @@ const storeDetail = ({ store, userInf, _alltags, reviews }) => {
                                         validationSchema={Yup.object({
                                             Review: Yup.string().required("Review cannot be empty"),
                                             Rate: Yup.string()
-                                            .required("Rating cannot be empty")
-                                            .oneOf(['0','1','2','3','4','5'])
+                                                .required("Rating cannot be empty")
+                                                .oneOf(['0', '1', '2', '3', '4', '5'])
                                         })}
                                         onSubmit={(values, actions) => {
                                             submitReview(values.Review, values.Rate, UserId, storeId, Name)
@@ -221,8 +233,8 @@ const storeDetail = ({ store, userInf, _alltags, reviews }) => {
 
                                 <VStack spacing='24px'>
                                     {reviews.map((review) => (
-                                        <VStack align="left" justify="center" spacing='12px' minWidth = '900px' maxWidth='900px'>
-                                                <Box rounded={'lg'} bg='white' boxShadow={'lg'} p={8}>
+                                        <VStack align="left" justify="center" spacing='12px' minWidth='900px' maxWidth='900px'>
+                                            <Box rounded={'lg'} bg='white' boxShadow={'lg'} p={8}>
                                                 <HStack spacing='16px'>
                                                     <Text>{review.authorName}</Text>
                                                     <ReviewRating rating={review.score} />
@@ -249,7 +261,7 @@ export async function getServerSideProps({ req, res, query }) {
     const user_name = session.user.name
     const case_id = case_email.substr(0, case_email.indexOf('@'));
 
-    const userInf = {Email: case_email, Image: user_image, Name: user_name, UserId: case_id}
+    const userInf = { Email: case_email, Image: user_image, Name: user_name, UserId: case_id }
 
     const { id } = query;
     const storeId = parseInt(id)
@@ -268,6 +280,30 @@ export async function getServerSideProps({ req, res, query }) {
             features: true,
         },
     })
+
+    const fav_stores_id = await prisma.User.findMany({
+        where: {
+            caseId: case_id,
+        },
+        select: {
+            favStore: {
+                select: {
+                    storeId: true,
+                },
+            },
+        },
+    })
+
+    const map = new Map();
+    const userStores = fav_stores_id[0].favStore
+    for (let i = 0; i < userStores.length; i++) {
+        map.set(userStores[i].storeId, i)
+    }
+    if (map.has(store.storeId)) {
+        store.fav = true
+    }
+    console.log(store)
+
     const reviews = await prisma.Review.findMany({
         where: {
             storeId: storeId
@@ -278,42 +314,41 @@ export async function getServerSideProps({ req, res, query }) {
             score: true
         }
     })
-    const map = new Map();
     const tags = await prisma.User.findMany({
         where: {
-          caseId: case_id,
+            caseId: case_id,
         },
         select: {
-          tags: {
-            select: {
-              tagId: true,
-              tagName: true,
-            }
-          },
+            tags: {
+                select: {
+                    tagId: true,
+                    tagName: true,
+                }
+            },
         },
-      })
-      const alltags = await prisma.Tag.findMany({
+    })
+    const alltags = await prisma.Tag.findMany({
         distinct: ['tagId'],
         select: {
-          tagId: true,
-          tagName: true,
+            tagId: true,
+            tagName: true,
         },
-      })
-      const userTags = tags[0].tags
-    
-      for (let i = 0; i < userTags.length; i++) {
+    })
+    const userTags = tags[0].tags
+
+    for (let i = 0; i < userTags.length; i++) {
         map.set(userTags[i].tagId, i)
-      }
-      for (let i = 0; i < alltags.length; i++) {
+    }
+    for (let i = 0; i < alltags.length; i++) {
         alltags[i].userId = case_id
         if (map.has(alltags[i].tagId)) {
-          alltags[i].selected = true
+            alltags[i].selected = true
         }
         else {
-          alltags[i].selected = false
+            alltags[i].selected = false
         }
-      }
-      const _alltags = alltags
+    }
+    const _alltags = alltags
     return { props: { store, userInf, _alltags, reviews } }
 }
 
