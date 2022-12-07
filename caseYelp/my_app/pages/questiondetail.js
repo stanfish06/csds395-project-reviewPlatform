@@ -37,7 +37,7 @@ import { BsStar, BsStarFill, BsStarHalf } from 'react-icons/bs';
 import { TiHeartOutline, TiHeart } from 'react-icons/Ti';
 
 const questionDetail = ({ _question, question_inf, userInf, answers, _alltags }) => {
-    console.log("now in detail function")
+
     const router = useRouter();
     const { 
         questionId, 
@@ -54,7 +54,7 @@ const questionDetail = ({ _question, question_inf, userInf, answers, _alltags })
     answers.map((answer) => {
         answer.answeredAt = answer.answeredAt.substring(1,11);
     })
-    console.log(answers);
+
     const {
         Name,
         UserId
@@ -62,13 +62,15 @@ const questionDetail = ({ _question, question_inf, userInf, answers, _alltags })
     const [alltags, setAlltags] = useState(_alltags);
 
     const submitAnswer = async (answerContent, userId, questionId, userName) => {
+        let date = new Date().toJSON();
         const response = await fetch('/api/answer', {
             method: 'POST',
             body: JSON.stringify({
-                userId: userId,
                 answer: answerContent,
-                questionId: questionId,
-                userName: userName
+                answeredAt: date,
+                userId: userId,
+                publisherName: userName,
+                questionId: questionId
             }),
         })
         router.reload(router.pathname)
@@ -131,10 +133,10 @@ const questionDetail = ({ _question, question_inf, userInf, answers, _alltags })
                                             <Form>
                                                 <Field name='Answer'>
                                                     {({ field, form }) => (
-                                                        <FormControl isInvalid={form.errors.Answer}>
+                                                        <FormControl isInvalid={form.errors.Review}>
                                                             <FormLabel>Answer</FormLabel>
                                                             <Input {...field} placeholder='Answer' />
-                                                            <FormErrorMessage>{form.errors.Answer}</FormErrorMessage>
+                                                            <FormErrorMessage>{form.errors.Review}</FormErrorMessage>
                                                         </FormControl>
                                                     )}
                                                 </Field>
@@ -233,7 +235,7 @@ export async function getServerSideProps({ req, res, query }) {
                 userId: answer.userId
             },
             select: {
-                Name: true
+                userName: true
             }
         })
     });
