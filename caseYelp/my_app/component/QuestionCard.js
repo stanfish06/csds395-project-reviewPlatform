@@ -14,6 +14,7 @@ import {
   Button,
   useBoolean,
   Text,
+  Spacer,
 } from "@chakra-ui/react";
 import { BsStar, BsStarFill, BsStarHalf } from "react-icons/bs";
 import { TiHeartOutline, TiHeart } from "react-icons/Ti";
@@ -31,82 +32,103 @@ const data = {
   numReviews: 34,
 };
 
-//   function Rating({ rating, numReviews }) {
-//     return (
-//       <Flex d="flex" alignItems="center" flexDir='row'>
-//         {Array(5)
-//           .fill('')
-//           .map((_, i) => {
-//             const roundedRating = Math.round(rating * 2) / 2;
-//             if (roundedRating - i >= 1) {
-//               return (
-//                 <BsStarFill
-//                   key={i}
-//                   style={{ marginLeft: '1' }}
-//                   color={i < rating ? 'teal.500' : 'gray.300'}
-//                 />
-//               );
-//             }
-//             if (roundedRating - i === 0.5) {
-//               return <BsStarHalf key={i} style={{ marginLeft: '1' }} />;
-//             }
-//             return <BsStar key={i} style={{ marginLeft: '1' }} />;
-//           })}
-//         <Box as="span" ml="2" color="gray.600" fontSize="sm">
-//           {numReviews} review{numReviews > 1 && 's'}
-//         </Box>
-//       </Flex>
-//     );
-//   }
-
-function Answers({ answers, numAnswers, questionId }) {
-  const router = useRouter()
+function Answers({ question, answers, numAnswers, questionId }) {
+  const router = useRouter();
   if (numAnswers == 0) {
     return (
-      <chakra.a href={"#"} display={"flex"}>
-        <Button
-          px={4}
-          fontSize={"sm"}
-          rounded={"full"}
-          bg={"gray.400"}
-          color={"white"}
-          //   boxShadow={
-          //     "0px 1px 25px -5px rgb(66 153 225 / 48%), 0 10px 10px -5px rgb(66 153 225 / 43%)"
-          //   }
-          _hover={{
-            bg: "gray.500",
-          }}
-          _focus={{
-            bg: "gray.500",
-          }}
+      <Flex mt="1" justifyContent="space-between" alignContent="center">
+        <Flex direction="column" gap="3">
+          <Box
+            fontSize="xl"
+            fontWeight="semibold"
+            as="h4"
+            lineHeight="tight"
+            isTruncated
+          >
+            {question}
+          </Box>
+          <Box textAlign="left" textColor="gray.500" align="center">
+            No Answers Yet
+          </Box>
+        </Flex>
+        <Tooltip
+          label="Check out this question!"
+          bg="white"
+          placement={"top"}
+          color={"gray.800"}
+          fontSize={"1.2em"}
         >
-          No Answers Yet
-        </Button>
-      </chakra.a>
+          <chakra.a href={"#"} display={"flex"}>
+            <Button
+              px={4}
+              fontSize={"sm"}
+              rounded={"full"}
+              bg={"blue.400"}
+              color={"white"}
+              boxShadow={
+                "0px 1px 25px -5px rgb(66 153 225 / 48%), 0 10px 10px -5px rgb(66 153 225 / 43%)"
+              }
+              _hover={{
+                bg: "blue.500",
+              }}
+              _focus={{
+                bg: "blue.500",
+              }}
+              onClick={() => router.push(`/questiondetail?id=${questionId}`)}
+            >
+              Write an Answer
+            </Button>
+          </chakra.a>
+        </Tooltip>
+      </Flex>
     );
   } else {
     return (
-      <chakra.a href={"#"} display={"flex"}>
-        <Button
-          px={4}
-          fontSize={"sm"}
-          rounded={"full"}
-          bg={"blue.400"}
-          color={"white"}
-          boxShadow={
-            "0px 1px 25px -5px rgb(66 153 225 / 48%), 0 10px 10px -5px rgb(66 153 225 / 43%)"
-          }
-          _hover={{
-            bg: "blue.500",
-          }}
-          _focus={{
-            bg: "blue.500",
-          }}
-          onClick={() => router.push(`/questiondetail?id=${questionId}`)}
+      <Flex mt="1" justifyContent="space-between" alignContent="center">
+        <Flex direction="column" gap="3">
+          <Box
+            fontSize="xl"
+            fontWeight="semibold"
+            as="h4"
+            lineHeight="tight"
+            isTruncated
+          >
+            {question}
+          </Box>
+          <Box textAlign="left" textColor="blue.400" align="center">
+            {numAnswers} Answers
+          </Box>
+        </Flex>
+        <Tooltip
+          label="Check out this question!"
+          bg="white"
+          placement={"top"}
+          color={"gray.800"}
+          fontSize={"1.2em"}
         >
-          View {numAnswers} answers
-        </Button>
-      </chakra.a>
+          <chakra.a href={"#"} display={"flex"}>
+            <Button
+              px={4}
+              fontSize={"sm"}
+              rounded={"full"}
+              bg={"blue.400"}
+              color={"white"}
+              boxShadow={
+                "0px 1px 25px -5px rgb(66 153 225 / 48%), 0 10px 10px -5px rgb(66 153 225 / 43%)"
+              }
+              _hover={{
+                bg: "blue.500",
+              }}
+              _focus={{
+                bg: "blue.500",
+              }}
+              onClick={() => router.push(`/questiondetail?id=${questionId}`)}
+            >
+              View Answers
+            </Button>
+          </chakra.a>
+        </Tooltip>
+      </Flex>
     );
   }
 }
@@ -144,26 +166,12 @@ function ProductAddToCart(_question) {
       />
 
       <Box p="6">
-        <Flex mt="1" justifyContent="space-between" alignContent="center">
-          <Box
-            fontSize="xl"
-            fontWeight="semibold"
-            as="h4"
-            lineHeight="tight"
-            isTruncated
-          >
-            {question}
-          </Box>
-          <Tooltip
-            label="Check out this question!"
-            bg="white"
-            placement={"top"}
-            color={"gray.800"}
-            fontSize={"1.2em"}
-          >
-            <Answers answers={answers} numAnswers={_count.answers} questionId={questionId} />
-          </Tooltip>
-        </Flex>
+        <Answers
+          question={question}
+          answers={answers}
+          numAnswers={_count.answers}
+          questionId={questionId}
+        />
       </Box>
     </Box>
   );

@@ -153,14 +153,31 @@ export const getServerSideProps = async ({ query: { term }, req }) => {
       isFirstLogin: false,
     },
   });
+  var searchTerm;
+
+  if (term == null) {
+    searchTerm = "";
+  } else {
+    searchTerm = term;
+  }
 
   // question
   const questions_temp = await prisma.Question.findMany({
     where: {
-      question: {
-        contains: term,
-        mode: "insensitive",
-      },
+      OR: [
+        {
+          question: {
+            contains: searchTerm,
+            mode: "insensitive",
+          },
+        },
+        {
+          storeName: {
+            contains: searchTerm,
+            mode: "insensitive",
+          },
+        },
+      ],
     },
     orderBy: { questionId: "asc" },
     include: {
@@ -169,6 +186,7 @@ export const getServerSideProps = async ({ query: { term }, req }) => {
           answers: true,
         },
       },
+      askStore: true,
     },
   });
 
