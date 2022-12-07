@@ -37,71 +37,29 @@ import { BsStar, BsStarFill, BsStarHalf } from 'react-icons/bs';
 import { TiHeartOutline, TiHeart } from 'react-icons/Ti';
 
 const questionDetail = ({ _question, question_inf, userInf, answers, _alltags }) => {
+    console.log("now in detail function")
     const router = useRouter();
     const { 
         questionId, 
-        question 
+        question,
+        userId
     } = question_inf;
     const { 
-        _count 
+        _count,
+        askedAt
     } = _question;
-    const numAnswers = _count.answers
+    let askedAtDate = askedAt.toString().substring(1,11);
+    
+    
+    answers.map((answer) => {
+        answer.answeredAt = answer.answeredAt.substring(1,11);
+    })
+    console.log(answers);
     const {
         Name,
         UserId
     } = userInf
     const [alltags, setAlltags] = useState(_alltags);
-
-    function Answers({ answers, numAnswers }) {
-        if (numAnswers == 0) {
-          return (
-            <chakra.a href={"#"} display={"flex"}>
-              <Button
-                px={4}
-                fontSize={"sm"}
-                rounded={"full"}
-                bg={"gray.400"}
-                color={"white"}
-                //   boxShadow={
-                //     "0px 1px 25px -5px rgb(66 153 225 / 48%), 0 10px 10px -5px rgb(66 153 225 / 43%)"
-                //   }
-                _hover={{
-                  bg: "gray.500",
-                }}
-                _focus={{
-                  bg: "gray.500",
-                }}
-              >
-                No Answers Yet
-              </Button>
-            </chakra.a>
-          );
-        } else {
-          return (
-            <chakra.a href={"#"} display={"flex"}>
-              <Button
-                px={4}
-                fontSize={"sm"}
-                rounded={"full"}
-                bg={"blue.400"}
-                color={"white"}
-                boxShadow={
-                  "0px 1px 25px -5px rgb(66 153 225 / 48%), 0 10px 10px -5px rgb(66 153 225 / 43%)"
-                }
-                _hover={{
-                  bg: "blue.500",
-                }}
-                _focus={{
-                  bg: "blue.500",
-                }}
-                onClick={() => router.push(`/question?id=${questionId}`)}
-              >
-                View {numAnswers} answers
-              </Button>
-            </chakra.a>
-          );
-        }
-    }
 
     const submitAnswer = async (answerContent, userId, questionId, userName) => {
         const response = await fetch('/api/answer', {
@@ -122,7 +80,7 @@ const questionDetail = ({ _question, question_inf, userInf, answers, _alltags })
             <Flex flexDir="row" width="100%">
                 <Sidebar />
                 <Box p="6">
-                    <Flex mt="1" justifyContent="space-between" alignContent="center">
+                    <Flex mt="1" justifyContent="space-between" alignContent="center" flexDir="column">
                         <Box
                             fontSize="xl"
                             fontWeight="semibold"
@@ -132,15 +90,24 @@ const questionDetail = ({ _question, question_inf, userInf, answers, _alltags })
                         >
                             {question}
                         </Box>
-                        <Tooltip
-                            label="Check out this question!"
-                            bg="white"
-                            placement={"top"}
-                            color={"gray.800"}
-                            fontSize={"1.2em"}
+                        <Box
+                            fontSize="x2"
+                            fontWeight="semibold"
+                            as="h4"
+                            lineHeight="tight"
+                            isTruncated
                         >
-                            <Answers answers={answers} numAnswers={_count.answers} />
-                        </Tooltip>
+                            {userId}
+                        </Box>
+                        <Box
+                            fontSize="x2"
+                            fontWeight="semibold"
+                            as="h4"
+                            lineHeight="tight"
+                            isTruncated
+                        >
+                            {askedAtDate}
+                        </Box>
                     </Flex>
                 </Box>
 
@@ -189,9 +156,11 @@ const questionDetail = ({ _question, question_inf, userInf, answers, _alltags })
                                     {answers.map((answer) => (
                                         <VStack align="left" justify="center" spacing='12px' minWidth='900px' maxWidth='900px'>
                                             <Box rounded={'lg'} bg='white' boxShadow={'lg'} p={8}>
-                                                <HStack spacing='16px'>
-                                                    <Text>{answer.authorName}</Text>
-                                                </HStack>
+                                            <HStack spacing='16px'>
+                                                <Text fontSize="20px" bold="true">{answer.userId}</Text>
+                                            </HStack>
+                                            
+                                            <hr/>
                                                 <Text>{answer.answer}</Text>
                                             </Box>
                                         </VStack>
@@ -252,11 +221,22 @@ export async function getServerSideProps({ req, res, query }) {
         where: {
             questionId: questionId
         },
-        select: {
+        /*select: {
             answer: true,
-            publisherName: true,
-        }
+            userId: true
+        }*/
     })
+    answers.forEach(async (answer) => {
+        answer.answeredAt = JSON.stringify(answer.answeredAt);
+        publisherName = await prisma.User.findUnique({
+            where: {
+                userId: answer.userId
+            },
+            select: {
+                Name: true
+            }
+        })
+    });
 
     const map = new Map();
     const tags = await prisma.User.findMany({
