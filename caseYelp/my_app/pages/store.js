@@ -108,21 +108,6 @@ const storeDetail = ({ store, userInf, _alltags, reviews }) => {
             </Flex>
         );
     }
-    // const addToFavorites = async (userId, storeId) => {
-    //     const response = await prisma.User.create({
-    //         where: {
-    //             caseId: userId
-    //         },
-    //         data: {
-    //             store: {
-    //                 connect: {
-    //                     favStore: storeId
-    //                 }
-    //             }
-    //         }
-    //     })
-    //     router.reload(router.pathname)
-    // }
 
     return (
         <>
@@ -141,8 +126,8 @@ const storeDetail = ({ store, userInf, _alltags, reviews }) => {
                         <ReviewRating rating={totalScore / _count.reviews} />
 
                         <HStack>
-                            {_alltags.map((tag) => (
-                                <Box rounded={'lg'} bg='white' boxShadow={'lg'} p={2}>
+                            {features.map((tag) => (
+                                <Box rounded={'full'} bg='white' boxShadow={'lg'} p={2}>
                                     <Text>
                                         {tag.tagName}
                                     </Text>
@@ -232,7 +217,7 @@ const storeDetail = ({ store, userInf, _alltags, reviews }) => {
                                 </Box>
 
                                 <VStack spacing='24px'>
-                                    {reviews.map((review) => (
+                                    {reviews.slice(0).reverse().map((review) => (
                                         <VStack align="left" justify="center" spacing='12px' minWidth='900px' maxWidth='900px'>
                                             <Box rounded={'lg'} bg='white' boxShadow={'lg'} p={8}>
                                                 <HStack spacing='16px'>
