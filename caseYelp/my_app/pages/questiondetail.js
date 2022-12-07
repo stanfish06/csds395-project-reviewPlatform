@@ -39,11 +39,15 @@ import { TiHeartOutline, TiHeart } from 'react-icons/Ti';
 const questionDetail = ({ _question, question_inf, userInf, answers, _alltags }) => {
 
     const router = useRouter();
-    const { 
+    let { 
         questionId, 
         question,
-        userId
+        userId,
+        publisherName
     } = question_inf;
+    if (question_inf.publisherName==""){
+        publisherName=userId;
+    }
     const { 
         _count,
         askedAt
@@ -99,7 +103,7 @@ const questionDetail = ({ _question, question_inf, userInf, answers, _alltags })
                             lineHeight="tight"
                             isTruncated
                         >
-                            {userId}
+                            {publisherName}
                         </Box>
                         <Box
                             fontSize="x2"
