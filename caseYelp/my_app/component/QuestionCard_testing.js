@@ -75,7 +75,7 @@ function Answers({ question, answers, numAnswers, questionId }) {
               _focus={{
                 bg: "blue.500",
               }}
-              onClick={() => router.push(`/questiondetail?id=${questionId}`)}
+              onClick={() => router.push(`/questiondetail_testing?id=${questionId}`)}
             >
               Write an Answer
             </Button>
@@ -123,7 +123,7 @@ function Answers({ question, answers, numAnswers, questionId }) {
               _focus={{
                 bg: "blue.500",
               }}
-              onClick={() => router.push(`/questiondetail?id=${questionId}`)}
+              onClick={() => router.push(`/questiondetail_testing?id=${questionId}`)}
             >
               View Answers
             </Button>

@@ -93,14 +93,14 @@ const questionDetail = ({ _question, question_inf, userInf, answers, _alltags })
 
     const deleteQuestion = async () => {
         const response = await fetch('/api/deleteQuestion', {
-          method: 'POST',
-          body: JSON.stringify({
-            questionId: questionId
-          }),
+            method: 'POST',
+            body: JSON.stringify({
+                questionId: questionId
+            }),
         })
         onClose()
-        router.push('/home')
-      }
+        router.push('/home_testing')
+    }
 
     return (
         <>
@@ -165,7 +165,7 @@ const questionDetail = ({ _question, question_inf, userInf, answers, _alltags })
                         <IconButton
                             colorScheme='red'
                             onClick={onOpen}
-                            visibility={() => (userId === UserId? 'visible' : 'hidden')}
+                            visibility={() => (userId === UserId ? 'visible' : 'hidden')}
                             icon={<DeleteIcon />}
                         />
                     </Flex>
@@ -238,9 +238,9 @@ const questionDetail = ({ _question, question_inf, userInf, answers, _alltags })
 export async function getServerSideProps({ req, res, query }) {
     const session = await getSession({ req });
 
-    const case_email = session.user.email
-    const user_image = session.user.image
-    const user_name = session.user.name
+    const case_email = 'zxy441@case.edu'
+    const user_image = ''
+    const user_name = 'Zhiyuan Yu'
     const case_id = case_email.substr(0, case_email.indexOf('@'));
 
     const userInf = { Email: case_email, Image: user_image, Name: user_name, UserId: case_id }
