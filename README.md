@@ -17,4 +17,4 @@ npm run dev
 - In one shell, enter npm run dev
 - In the other shell, enter npx cypress open
 - Note: please do not use the app in the browser while the test is running
-- If for some reason, testing fails to run, please look at testing-result.png under csds395-project-reviewPlatform
+- If for some reasons, testing fails to run, please look at testing-result.png under csds395-project-reviewPlatform
