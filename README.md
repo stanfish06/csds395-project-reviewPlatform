@@ -8,9 +8,10 @@ The folder in this repository are:
 ## Instruction for Running Locally
 ### Installing 
 1. git clone the project
-2. npm install next
-3. npm install prisma --save-dev
-4. npm install cypress
+2. Enter the my_app folder
+3. npm install next
+4. npm install prisma --save-dev
+5. npm install cypress
 ### Running app
 npm run dev
 ### Running cypress test (testing requires the application in running)
