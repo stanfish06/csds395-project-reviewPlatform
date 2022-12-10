@@ -5,7 +5,7 @@ The folder in this repository are:
 - *docs* - Documents and Figures for the Web-App
 - **To Be Updated**. 
 ## Presentation and Demo video
-Videa can be found [here](https://drive.google.com/file/d/1uKYoNYY1QsoNdFvfpfgGA9MDzGOVXE0E/view?usp=share_link).
+Video can be found [here](https://drive.google.com/file/d/1uKYoNYY1QsoNdFvfpfgGA9MDzGOVXE0E/view?usp=share_link).
 
 ## Instruction for Running Locally
 ### Installing 
