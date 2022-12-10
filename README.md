@@ -6,4 +6,14 @@ The folder in this repository are:
 - **To Be Updated**. 
 
 ## Instruction for Running Locally
-**To Be Updated**. 
+### Installing 
+1. git clone the project
+2. npm install next
+3. npm install prisma --save-dev
+4. npm install cypress
+### Running app
+npm run dev
+### Running cypress test (testing requires the application in running)
+In one shell, enter npm run dev
+In the other shell, enter npx cypress open
+Note: please do not use the app in the browser while the test is running
