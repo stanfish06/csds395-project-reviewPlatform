@@ -14,6 +14,6 @@ The folder in this repository are:
 ### Running app
 npm run dev
 ### Running cypress test (testing requires the application in running)
-In one shell, enter npm run dev
-In the other shell, enter npx cypress open
-Note: please do not use the app in the browser while the test is running
+- In one shell, enter npm run dev
+- In the other shell, enter npx cypress open
+- Note: please do not use the app in the browser while the test is running
